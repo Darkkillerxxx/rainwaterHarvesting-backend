@@ -1,10 +1,14 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { queryData } from './dbconfig.js';
+import cors from 'cors';
 
 var jsonParser = bodyParser.json()
 const app = express();
 
+app.use(cors());
+
+app.use(express.json({ limit: '50mb' }));
 
 function generateMSSQLInsertQuery(tableName, insertObject) {
     // Get the keys and values from the object
