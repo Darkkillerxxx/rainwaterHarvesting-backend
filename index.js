@@ -97,7 +97,7 @@ app.get('/getDashboardValues', async (req, res) => {
 
     const getPieChartValue = `SELECT DISTINCT TALUKA,Count(*) as count FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}' GROUP BY TALUKA;`
   
-    const totalCountQuery = `SELECT COUNT(*) as Total_Records FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}'`
+    const totalCountQuery = `SELECT COUNT(*) as Total_Records FROM Water_Harvesting`
 
     const getStackedBarChartValue = `SELECT TALUKA, ENG_GRANT, COUNT(*) AS count FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}' GROUP BY TALUKA, ENG_GRANT;`
 
@@ -119,7 +119,7 @@ app.get('/getDashboardValues', async (req, res) => {
             inaugrationCount:inaugrationCount.recordset[0].Total_Inaugration_Count,
             completionCount:completionCount.recordset[0].Total_completion_Count,
             totalTargetCount:totalTargetCount.recordset[0].Total_Target_Records,
-            totalRecordCount:totalTargetCount.recordset[0].Total_Records,
+            totalRecordCount:totalCount.recordset[0].Total_Records,
             pieChart:pieChart.recordset,
             stackedBarChart:stackedBarChar.recordset        
         }
