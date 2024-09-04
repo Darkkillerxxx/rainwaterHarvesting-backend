@@ -31,6 +31,26 @@ function generateMSSQLInsertQuery(tableName, insertObject) {
     return query;
 }
 
+app.get('/getAllLocationForDistricts',async(req,res)=>{
+    try{
+        const { DISTRICT } = req.query;
+        const response = await queryData(`SELECT Latitude,longitude,Village from Water_Harvesting WHERE DISTRICT='${DISTRICT}' AND Latitude IS NOT NULL AND Longitude IS NOT NULL`);
+
+        res.send({
+            code:200,
+            message:200,
+            data:response.recordsets[0]
+        })
+
+    }
+    catch(error){
+        return {
+            code:500,
+            message:error.message
+        }
+    }
+})
+
 app.get('/getAllDistrics',async(req,res)=>{
     const response = await queryData(`select Distinct DISTRICT from Water_Harvesting`);
     res.send({
