@@ -93,24 +93,24 @@ app.get('/getDashboardValues', async (req, res) => {
     const completionCountQuery = `SELECT COUNT(*) as Total_completion_Count 
                                FROM (SELECT * FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}' AND COMPLETED_DATE IS NOT NULL) AS DistinctVillages`;
     
-    const totalRecords = `SELECT COUNT(*) as Total_Records FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}'`;
+    const totalTargetQuery = `SELECT COUNT(*) as Total_Target_Records FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}'`;
 
     const getPieChartValue = `SELECT DISTINCT TALUKA,Count(*) as count FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}' GROUP BY TALUKA;`
-    // const targetCountQuery = `SELECT COUNT(*) as Total_Distinct_Targets_Count 
-    //                           FROM (SELECT DISTINCT TARGET FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}') AS DistinctTargets`;
+  
+    const totalCountQuery = `SELECT COUNT(*) as Total_Records FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}'`
 
     const getStackedBarChartValue = `SELECT TALUKA, ENG_GRANT, COUNT(*) AS count FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}' GROUP BY TALUKA, ENG_GRANT;`
 
     try {
-        const [talukasCount, villageCount, inaugrationCount, completionCount, totalRecordCount, pieChart, stackedBarChar] = await Promise.all([
+        const [talukasCount, villageCount, inaugrationCount, completionCount, totalTargetCount, pieChart, stackedBarChar, totalCount] = await Promise.all([
             queryData(talukasCountQuery),
             queryData(villageCountQuery),
             queryData(inaugrationCountQuery),
             queryData(completionCountQuery),
-            queryData(totalRecords),
+            queryData(totalTargetQuery),
             queryData(getPieChartValue),
-            queryData(getStackedBarChartValue)
-            // queryData(targetCountQuery, { DISTRICT })
+            queryData(getStackedBarChartValue),
+            queryData(totalCountQuery)
         ]);
         console.log(talukasCount);
         const finalResponse = {
@@ -118,7 +118,8 @@ app.get('/getDashboardValues', async (req, res) => {
             villageCount:villageCount.recordset[0].Total_Distinct_Village_Count,
             inaugrationCount:inaugrationCount.recordset[0].Total_Inaugration_Count,
             completionCount:completionCount.recordset[0].Total_completion_Count,
-            totalRecordCount:totalRecordCount.recordset[0].Total_Records,
+            totalTargetCount:totalTargetCount.recordset[0].Total_Target_Records,
+            totalRecordCount:totalTargetCount.recordset[0].Total_Records,
             pieChart:pieChart.recordset,
             stackedBarChart:stackedBarChar.recordset        
         }
@@ -172,7 +173,28 @@ app.post('/createRecords',jsonParser,async (req,res)=>{
         code:200,
         message:"Data Created"
     })
+})
 
+app.get('/fetchRecords',async(req,res)=>{
+    try{
+        const { DISTRICT } = req.query; // Get DISTRICT from query parameters
+        const response = await queryData(`
+            SELECT * from Water_Harvesting WHERE DISTRICT = '${DISTRICT}'
+        `);
+
+        res.send({
+            code:200,
+            message:"Data Fetch Successfull",
+            data:response.recordsets[0]
+        })
+    }
+    catch(error){
+        res.send({
+            code:500,
+            message:error.message,
+            data:response.recordsets[0]
+        })
+    }
 })
 
 app.listen(process.env.PORT || 3000,()=>{
