@@ -166,7 +166,6 @@ app.get('/getAllTargets',async(req,res)=>{
 app.post('/createRecords',jsonParser,async (req,res)=>{
     const { body } = req;
     const createQuery = generateMSSQLInsertQuery('Water_Harvesting1',body);
-    console.log(createQuery);
     await queryData(createQuery);
 
     res.send({
