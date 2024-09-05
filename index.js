@@ -175,27 +175,40 @@ app.post('/createRecords',jsonParser,async (req,res)=>{
     })
 })
 
-app.get('/fetchRecords',async(req,res)=>{
-    try{
-        const { DISTRICT } = req.query; // Get DISTRICT from query parameters
-        const response = await queryData(`
-            SELECT * from Water_Harvesting WHERE DISTRICT = '${DISTRICT}'
-        `);
-
-        res.send({
-            code:200,
-            message:"Data Fetch Successfull",
-            data:response.recordsets[0]
-        })
+app.get('/fetchRecords', async (req, res) => {
+    try {
+      const { Taluka, offSet } = req.query;
+    
+      // Queries
+      const totalRecordsQuery = `SELECT COUNT(*) as totalRecords FROM Water_Harvesting WHERE TALUKA = '${Taluka}'`;
+      const fetchTalukaRecordsQuery = `SELECT * FROM Water_Harvesting WHERE TALUKA='${Taluka}' ORDER BY ID OFFSET ${offSet ? offSet : 0} ROWS FETCH NEXT 11 ROWS ONLY;`;
+    
+      console.log(`SELECT * FROM Water_Harvesting WHERE TALUKA='${Taluka}' ORDER BY ID OFFSET ${offSet ? offSet : 0} ROWS FETCH NEXT 11 ROWS ONLY`)
+      // Execute both queries in parallel using Promise.all
+      const [totalRecords, fetchTalukaRecords] = await Promise.all([
+        queryData(totalRecordsQuery),
+        queryData(fetchTalukaRecordsQuery)
+      ]);
+    
+      // Send success response
+      res.send({
+        code: 200,
+        message: "Data Fetch Successful",
+        data: {
+          totalCount: totalRecords.recordset[0].totalRecords,  // Access the first record of the result set
+          data: fetchTalukaRecords.recordset                   // Return the fetched records
+        }
+      });
+    } catch (error) {
+      // Send error response without referencing undefined variables
+      res.send({
+        code: 500,
+        message: error.message,
+        data: null  // No data in case of error
+      });
     }
-    catch(error){
-        res.send({
-            code:500,
-            message:error.message,
-            data:response.recordsets[0]
-        })
-    }
-})
+  });
+    
 
 app.listen(process.env.PORT || 3000,()=>{
     console.log(`App listening on port 3000`);
