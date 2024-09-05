@@ -62,7 +62,7 @@ app.get('/getAllDistrics',async(req,res)=>{
 
 app.get('/getPicklistValues',async(req,res)=>{
     try{
-        const response = await queryData(`select Distinct DISTRICT,TALUKA from Water_Harvesting`);
+        const response = await queryData(`select Distinct DISTRICT,TALUKA,VILLAGE from Water_Harvesting`);
         res.send({
             code:200,
             message:"Success",
