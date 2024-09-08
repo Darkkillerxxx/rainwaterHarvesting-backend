@@ -1,7 +1,16 @@
-import express from 'express';
+import "dotenv/config"
+import express, { response } from 'express';
 import bodyParser from 'body-parser';
 import { queryData } from './dbconfig.js';
 import cors from 'cors';
+import Crypto from "crypto-js";
+import jwt from "jsonwebtoken";
+
+
+const jwtSecret = process.env.JWTSECRET;
+let key = Crypto.enc.Base64.parse(process?.env?.AESSECRET);
+let iv = Crypto.enc.Hex.parse("00000000000000000000000000000000");
+
 
 var jsonParser = bodyParser.json()
 const app = express();
@@ -208,7 +217,40 @@ app.get('/fetchRecords', async (req, res) => {
       });
     }
   });
-    
+
+  app.post('/login',async(req,res)=>{
+    try{
+        const {username,password} = req.body;
+        const query = `Select * FROM tblUSER WHERE USR_NM = '${username}' AND USR_PWD = '${password}'`;
+
+        const response = await queryData(query);
+        console.log(response.recordset);
+
+        if(response && response.recordset.length > 0){
+            const userId = response.recordset.USR_ID
+            const accessToken = jwt.sign({ userId }, jwtSecret, {
+                expiresIn: "100000d",
+              });
+
+            res.send({
+                code:200,
+                message:"User Found",
+                token:accessToken              
+            })
+            return
+        }
+        res.send({
+            code:404,
+            message:"User Not Found"
+        })
+    }
+    catch(error){
+        res.send({
+            code: 500,
+            message: error.message,
+          });
+    }
+  })
 
 app.listen(process.env.PORT || 3000,()=>{
     console.log(`App listening on port 3000`);
