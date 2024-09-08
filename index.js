@@ -186,19 +186,30 @@ app.post('/createRecords',jsonParser,async (req,res)=>{
 
 app.get('/fetchRecords', async (req, res) => {
     try {
-      const { Taluka, offSet } = req.query;
-    
+      const { District, Village, Taluka, offSet } = req.query;
+      // Initialize the conditions array
+      const conditions = [];
+  
+      // Add conditions if the values are not null
+      if (District && District != 'null') conditions.push(`DISTRICT = '${District}'`);
+      if (Village && Village != 'null') conditions.push(`VILLAGE = '${Village}'`);
+      if (Taluka && Taluka != 'null') conditions.push(`TALUKA = '${Taluka}'`);
+  
+      // Join the conditions with AND operator
+      const conditionsString = conditions.join(' AND ');
+  
       // Queries
-      const totalRecordsQuery = `SELECT COUNT(*) as totalRecords FROM Water_Harvesting WHERE TALUKA = '${Taluka}'`;
-      const fetchTalukaRecordsQuery = `SELECT * FROM Water_Harvesting WHERE TALUKA='${Taluka}' ORDER BY ID OFFSET ${offSet ? offSet : 0} ROWS FETCH NEXT 11 ROWS ONLY;`;
-    
-      console.log(`SELECT * FROM Water_Harvesting WHERE TALUKA='${Taluka}' ORDER BY ID OFFSET ${offSet ? offSet : 0} ROWS FETCH NEXT 11 ROWS ONLY`)
+      const totalRecordsQuery = `SELECT COUNT(*) as totalRecords FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''}`;
+      const fetchTalukaRecordsQuery = `SELECT * FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''} ORDER BY ID OFFSET ${offSet ? offSet : 0} ROWS FETCH NEXT 11 ROWS ONLY;`;
+  
+      console.log(fetchTalukaRecordsQuery);
+  
       // Execute both queries in parallel using Promise.all
       const [totalRecords, fetchTalukaRecords] = await Promise.all([
         queryData(totalRecordsQuery),
         queryData(fetchTalukaRecordsQuery)
       ]);
-    
+  
       // Send success response
       res.send({
         code: 200,
@@ -217,6 +228,7 @@ app.get('/fetchRecords', async (req, res) => {
       });
     }
   });
+  
 
   app.post('/login',async(req,res)=>{
     try{
