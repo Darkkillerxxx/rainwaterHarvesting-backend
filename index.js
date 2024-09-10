@@ -40,6 +40,41 @@ function generateMSSQLInsertQuery(tableName, insertObject) {
     return query;
 }
 
+function generateMSSQLUpdateQuery(tableName, updateObject, conditionObject) {
+    // Get the keys and values from the object to be updated
+    const updateKeys = Object.keys(updateObject);
+    const updateValues = Object.values(updateObject);
+    
+    // Construct the SET part of the query
+    const setPart = updateKeys
+      .map((key, index) => {
+        const value = updateValues[index];
+        return typeof value === 'string'
+          ? `[${key}] = '${value.replace(/'/g, "''")}'`
+          : `[${key}] = ${value}`;
+      })
+      .join(', ');
+    
+    // Construct the condition part (WHERE clause)
+    const conditionKeys = Object.keys(conditionObject);
+    const conditionValues = Object.values(conditionObject);
+    
+    const conditionPart = conditionKeys
+      .map((key, index) => {
+        const value = conditionValues[index];
+        return typeof value === 'string'
+          ? `[${key}] = '${value.replace(/'/g, "''")}'`
+          : `[${key}] = ${value}`;
+      })
+      .join(' AND ');
+  
+    // Construct the final UPDATE SQL query
+    const query = `UPDATE ${tableName} SET ${setPart} WHERE ${conditionPart}`;
+  
+    return query;
+  }
+  
+
 app.get('/getAllLocationForDistricts',async(req,res)=>{
     try{
         const { DISTRICT } = req.query;
@@ -175,7 +210,18 @@ app.get('/getAllTargets',async(req,res)=>{
 
 app.post('/createRecords',jsonParser,async (req,res)=>{
     const { body } = req;
-    const createQuery = generateMSSQLInsertQuery('Water_Harvesting1',body);
+    const createQuery = generateMSSQLInsertQuery('Water_Harvesting',body);
+    await queryData(createQuery);
+
+    res.send({
+        code:200,
+        message:"Data Created"
+    })
+})
+
+app.post('/updateRecords',jsonParser,async (req,res)=>{
+    const { body } = req;
+    const createQuery = generateMSSQLUpdateQuery('Water_Harvesting',body);
     await queryData(createQuery);
 
     res.send({
