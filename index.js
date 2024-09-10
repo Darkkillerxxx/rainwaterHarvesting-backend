@@ -246,7 +246,7 @@ app.get('/fetchRecords', async (req, res) => {
   
       // Queries
       const totalRecordsQuery = `SELECT COUNT(*) as totalRecords FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''}`;
-      const fetchTalukaRecordsQuery = `SELECT * FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''} ORDER BY ID OFFSET ${offSet ? offSet : 0} ROWS FETCH NEXT 11 ROWS ONLY;`;
+      const fetchTalukaRecordsQuery = `SELECT * FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''} ORDER BY ID`;
   
       console.log(fetchTalukaRecordsQuery);
   
