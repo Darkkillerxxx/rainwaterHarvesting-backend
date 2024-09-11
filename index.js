@@ -5,7 +5,10 @@ import { queryData } from './dbconfig.js';
 import cors from 'cors';
 import Crypto from "crypto-js";
 import jwt from "jsonwebtoken";
+import Client from 'ftp';
+import fs from 'fs';
 
+const ftpClient = new Client();
 
 const jwtSecret = process.env.JWTSECRET;
 let key = Crypto.enc.Base64.parse(process?.env?.AESSECRET);
@@ -19,8 +22,44 @@ app.use(cors());
 
 app.use(express.json({ limit: '50mb' }));
 
+function uploadImageToFTP(imagePath, imageName) {
+    return new Promise((resolve, reject) => {
+        ftpClient.connect({
+            'host': 'ftp.jalshakti.co.in',
+            'user': 'u428611290.jalshakti',
+            'password': 'Jalshakti@2024'
+        });
+
+        ftpClient.on('ready', () => {
+            console.log('FTP connection ready');
+
+            ftpClient.put(imagePath, imageName, (err) => {
+                if (err) {
+                    reject('Error uploading file: ' + err);
+                } else {
+                    console.log('File uploaded successfully');
+
+                    // Construct the public URL
+                    const publicUrl = `http://jalshakti.co.in/${imageName}`;
+                    console.log('Publicly accessible URL:', publicUrl);
+
+                    resolve(publicUrl);
+                }
+
+                // Close the FTP connection
+                ftpClient.end();
+            });
+        });
+
+        ftpClient.on('error', (err) => {
+            reject('FTP connection error: ' + err);
+        });
+    });
+}
+
 function generateMSSQLInsertQuery(tableName, insertObject) {
     // Get the keys and values from the object
+    console.log(62,insertObject);
     const keys = Object.keys(insertObject);
     const values = Object.values(insertObject);
   
@@ -208,20 +247,69 @@ app.get('/getAllTargets',async(req,res)=>{
     }
 })
 
-app.post('/createRecords',jsonParser,async (req,res)=>{
+app.post('/createRecords', jsonParser, async (req, res) => {
     const { body } = req;
-    const createQuery = generateMSSQLInsertQuery('Water_Harvesting',body);
-    await queryData(createQuery);
+    const { Inauguration_PHOTO1 } = body; // Assume the base64 image is passed in this field
 
-    res.send({
-        code:200,
-        message:"Data Created"
-    })
-})
+    try {
+        // Validate if Inauguration_PHOTO1 exists and is a valid base64 string
+        if (!Inauguration_PHOTO1 || !Inauguration_PHOTO1.startsWith('data:image/')) {
+            return res.status(400).send({
+                code: 400,
+                message: 'Invalid or missing base64 image data',
+            });
+        }
+
+        // Generate a random number for the image name
+        const randomNumber = Math.floor(Math.random() * 1000000);
+        const imageName = `Inauguration_${randomNumber}.png`;
+
+        // Determine image type (png, jpeg, etc.)
+        const matches = Inauguration_PHOTO1.match(/^data:image\/([a-zA-Z]+);base64,/);
+        if (!matches || matches.length < 2) {
+            return res.status(400).send({
+                code: 400,
+                message: 'Invalid image format',
+            });
+        }
+        const imageType = matches[1]; // Extract the image type (png, jpeg, etc.)
+
+        // Construct the file name with the correct extension
+        const imagePath = `./Inauguration_${randomNumber}.${imageType}`;
+
+        // Remove any whitespaces or newlines that may corrupt the image
+        const base64Data = Inauguration_PHOTO1.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
+
+        // Write the decoded base64 data as binary
+        fs.writeFileSync(imagePath, base64Data, { encoding: 'base64' });
+
+        // Upload the image to FTP and get the public URL
+        const publicUrl = await uploadImageToFTP(imagePath, imageName);
+
+        // Store the public URL in the request body
+        body.Inauguration_PHOTO1 = publicUrl;
+
+        // Generate the MSSQL insert query
+        const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
+        await queryData(createQuery);
+
+        res.send({
+            code: 200,
+            message: 'Data Created',
+        });
+
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).send({
+            code: 500,
+            message: 'Error processing request',
+        });
+    }
+});
 
 app.post('/updateRecords',jsonParser,async (req,res)=>{
     const { body } = req;
-    const createQuery = generateMSSQLUpdateQuery('Water_Harvesting',body);
+    const createQuery = generateMSSQLUpdateQuery('Water_Harvesting',body,{ID:body.Id});
     await queryData(createQuery);
 
     res.send({
