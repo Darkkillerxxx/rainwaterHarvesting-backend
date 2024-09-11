@@ -80,24 +80,33 @@ function generateMSSQLInsertQuery(tableName, insertObject) {
 }
 
 function generateMSSQLUpdateQuery(tableName, updateObject, conditionObject) {
-    // Get the keys and values from the object to be updated
-    const updateKeys = Object.keys(updateObject);
-    const updateValues = Object.values(updateObject);
-    
+    // Exclude 'ID' from the updateObject by filtering both keys and values together
+    const entries = Object.entries(updateObject).filter(([key]) => key !== 'ID');
+  
     // Construct the SET part of the query
-    const setPart = updateKeys
-      .map((key, index) => {
-        const value = updateValues[index];
+    const setPart = entries
+      .map(([key, value]) => {
+        // Handle null values
+        if (value === null || value === undefined) {
+          return `[${key}] = NULL`;
+        }
+  
+        // Handle date values (assuming they're passed as strings or Date objects)
+        if (key.toLowerCase().includes('date') && value instanceof Date) {
+          return `[${key}] = '${value.toISOString().split('T')[0]}'`; // Format date as 'YYYY-MM-DD'
+        }
+  
+        // Escape strings and replace single quotes to avoid SQL injection
         return typeof value === 'string'
           ? `[${key}] = '${value.replace(/'/g, "''")}'`
           : `[${key}] = ${value}`;
       })
       .join(', ');
-    
-    // Construct the condition part (WHERE clause)
+  
+    // Construct the condition part (WHERE clause) based on the conditionObject (e.g., where ID = X)
     const conditionKeys = Object.keys(conditionObject);
     const conditionValues = Object.values(conditionObject);
-    
+  
     const conditionPart = conditionKeys
       .map((key, index) => {
         const value = conditionValues[index];
@@ -112,6 +121,8 @@ function generateMSSQLUpdateQuery(tableName, updateObject, conditionObject) {
   
     return query;
   }
+   
+  
   
 
 app.get('/getAllLocationForDistricts',async(req,res)=>{
@@ -319,12 +330,13 @@ app.post('/createRecords', jsonParser, async (req, res) => {
 
 app.post('/updateRecords',jsonParser,async (req,res)=>{
     const { body } = req;
-    const createQuery = generateMSSQLUpdateQuery('Water_Harvesting',body,{ID:body.Id});
+    const createQuery = generateMSSQLUpdateQuery('Water_Harvesting',body,{ID:body.ID});
+    console.log(createQuery);
     await queryData(createQuery);
 
     res.send({
         code:200,
-        message:"Data Created"
+        message:"Data Updated"
     })
 })
 
