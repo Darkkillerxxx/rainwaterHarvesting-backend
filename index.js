@@ -247,6 +247,7 @@ app.get('/getAllTargets',async(req,res)=>{
     }
 })
 
+
 app.post('/createRecords', jsonParser, async (req, res) => {
     const { body } = req;
     const { Inauguration_PHOTO1 } = body; // Assume the base64 image is passed in this field
@@ -289,6 +290,9 @@ app.post('/createRecords', jsonParser, async (req, res) => {
         // Store the public URL in the request body
         body.Inauguration_PHOTO1 = publicUrl;
 
+        // Delete the local file after FTP upload
+        fs.unlinkSync(imagePath);
+
         // Generate the MSSQL insert query
         const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
         await queryData(createQuery);
@@ -300,6 +304,12 @@ app.post('/createRecords', jsonParser, async (req, res) => {
 
     } catch (error) {
         console.error('Error:', error);
+
+        // In case of an error, clean up the local file if it exists
+        if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+        }
+
         res.status(500).send({
             code: 500,
             message: 'Error processing request',
