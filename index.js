@@ -140,7 +140,7 @@ function generateMSSQLUpdateQuery(tableName, updateObject, conditionObject) {
 app.get('/getAllLocationForDistricts',async(req,res)=>{
     try{
         const { DISTRICT } = req.query;
-        const response = await queryData(`SELECT Latitude,longitude,Village,Location,Inauguration_DATE,Inauguration_PHOTO1,COMPLETED_PHOTO1 from Water_Harvesting WHERE DISTRICT='${DISTRICT}' AND Latitude IS NOT NULL AND Longitude IS NOT NULL`);
+        const response = await queryData(`SELECT Latitude,longitude,District,Taluka,Village,Location,Inauguration_DATE,COMPLETED_DATE,Inauguration_PHOTO1,COMPLETED_PHOTO1 from Water_Harvesting WHERE DISTRICT='${DISTRICT}' AND Latitude IS NOT NULL AND Longitude IS NOT NULL`);
 
         res.send({
             code:200,
