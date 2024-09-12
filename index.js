@@ -7,6 +7,12 @@ import Crypto from "crypto-js";
 import jwt from "jsonwebtoken";
 import Client from 'ftp';
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const ftpClient = new Client();
 
@@ -24,17 +30,14 @@ app.use(express.json({ limit: '50mb' }));
 
 function uploadImageToFTP(imagePath, imageName) {
     return new Promise((resolve, reject) => {
-        ftpClient.connect({
-            'host': 'ftp.jalshakti.co.in',
-            'user': 'u428611290.jalshakti',
-            'password': 'Jalshakti@2024'
-        });
-
-        ftpClient.on('ready', () => {
+        const client = new Client();
+        
+        client.on('ready', () => {
             console.log('FTP connection ready');
 
-            ftpClient.put(imagePath, imageName, (err) => {
+            client.put(imagePath, imageName, (err) => {
                 if (err) {
+                    console.error('Error uploading file:', err);
                     reject('Error uploading file: ' + err);
                 } else {
                     console.log('File uploaded successfully');
@@ -47,12 +50,21 @@ function uploadImageToFTP(imagePath, imageName) {
                 }
 
                 // Close the FTP connection
-                ftpClient.end();
+                console.log('Closing the FTP connection');
+                client.end();
             });
         });
 
-        ftpClient.on('error', (err) => {
+        client.on('error', (err) => {
+            console.error('FTP connection error:', err);
             reject('FTP connection error: ' + err);
+        });
+
+        // Connect to FTP server
+        client.connect({
+            host: 'ftp.jalshakti.co.in',
+            user: 'u428611290.jalshakti',
+            password: 'Jalshakti@2024'
         });
     });
 }
@@ -328,17 +340,82 @@ app.post('/createRecords', jsonParser, async (req, res) => {
     }
 });
 
-app.post('/updateRecords',jsonParser,async (req,res)=>{
-    const { body } = req;
-    const createQuery = generateMSSQLUpdateQuery('Water_Harvesting',body,{ID:body.ID});
-    console.log(createQuery);
-    await queryData(createQuery);
 
-    res.send({
-        code:200,
-        message:"Data Updated"
-    })
-})
+app.post('/updateRecords', jsonParser, async (req, res) => {
+    try {
+        const { body } = req;
+        const { inaugurationPhotoBase64, completionPhotoBase64, ID, ...updateFields } = body;
+        
+        let inaugurationPhotoUrl = null;
+        let completionPhotoUrl = null;
+        const randomNumber = Math.floor(Math.random() * 1000000);
+        // Save and upload inauguration photo
+        if (inaugurationPhotoBase64) {
+            const matches = inaugurationPhotoBase64.match(/^data:image\/([a-zA-Z]+);base64,/);
+            if (!matches || matches.length < 2) {
+                return res.status(400).send({
+                    code: 400,
+                    message: 'Invalid image format',
+                });
+            }
+            const imageType = matches[1]; 
+            const imageName = `Inauguration_${randomNumber}.${imageType}`;
+            const inaugurationImagePath = path.join(__dirname, imageName);
+            // Remove any whitespaces or newlines from the base64 string
+            const base64Data = inaugurationPhotoBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
+            // Write the decoded base64 data as binary
+            fs.writeFileSync(inaugurationImagePath, base64Data, { encoding: 'base64' });
+            inaugurationPhotoUrl = await uploadImageToFTP(inaugurationImagePath, imageName);
+            fs.unlinkSync(inaugurationImagePath); // Remove the temp file after upload
+        }
+
+        // Save and upload completion photo
+        if (completionPhotoBase64) {
+            const matches = completionPhotoBase64.match(/^data:image\/([a-zA-Z]+);base64,/);
+            if (!matches || matches.length < 2) {
+                return res.status(400).send({
+                    code: 400,
+                    message: 'Invalid image format',
+                });
+            }
+            const imageType = matches[1];
+            const imageName = `Completion_${randomNumber}.${imageType}`;
+            const completionImagePath = path.join(__dirname, imageName);
+
+            // Remove any whitespaces or newlines from the base64 string
+            const base64Data = completionPhotoBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
+            // Write the decoded base64 data as binary
+            fs.writeFileSync(completionImagePath, base64Data, { encoding: 'base64' });
+            completionPhotoUrl = await uploadImageToFTP(completionImagePath, imageName);
+            console.log(completionImagePath);
+            fs.unlinkSync(completionImagePath); // Remove the temp file after upload
+        }
+
+        // Prepare the update object
+        const updateObject = {
+            ...updateFields,
+            Inauguration_PHOTO1: inaugurationPhotoUrl,
+            COMPLETED_PHOTO1: completionPhotoUrl
+        };
+        // Generate the MSSQL update query
+        const updateQuery = generateMSSQLUpdateQuery('Water_Harvesting', updateObject, { ID });
+        console.log(updateQuery);
+
+
+        // Execute the query
+        await queryData(updateQuery);
+        // Respond to the client
+        res.send({
+            code: 200,
+            message: 'Data updated successfully',
+            inaugurationPhotoUrl,
+            completionPhotoUrl
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ code: 500, message: 'Error updating data', error });
+    }
+});
 
 app.get('/fetchRecords', async (req, res) => {
     try {
