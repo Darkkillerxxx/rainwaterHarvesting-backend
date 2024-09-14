@@ -140,7 +140,7 @@ function generateMSSQLUpdateQuery(tableName, updateObject, conditionObject) {
 app.get('/getAllLocationForDistricts',async(req,res)=>{
     try{
         const { DISTRICT } = req.query;
-        const response = await queryData(`SELECT Latitude,longitude,District,Taluka,Village,Location,Inauguration_DATE,COMPLETED_DATE,Inauguration_PHOTO1,COMPLETED_PHOTO1 from Water_Harvesting12092024 WHERE DISTRICT='${DISTRICT}' AND Latitude IS NOT NULL AND Longitude IS NOT NULL`);
+        const response = await queryData(`SELECT Latitude,longitude,District,Taluka,Village,Location,Inauguration_DATE,COMPLETED_DATE,Inauguration_PHOTO1,COMPLETED_PHOTO1 from Water_Harvesting WHERE DISTRICT='${DISTRICT}' AND Latitude IS NOT NULL AND Longitude IS NOT NULL`);
 
         res.send({
             code:200,
@@ -158,7 +158,7 @@ app.get('/getAllLocationForDistricts',async(req,res)=>{
 })
 
 app.get('/getAllDistrics',async(req,res)=>{
-    const response = await queryData(`select Distinct DISTRICT from Water_Harvesting12092024`);
+    const response = await queryData(`select Distinct DISTRICT from Water_Harvesting`);
     res.send({
         code:200,
         message:"Success",
@@ -168,7 +168,7 @@ app.get('/getAllDistrics',async(req,res)=>{
 
 app.get('/getPicklistValues',async(req,res)=>{
     try{
-        const response = await queryData(`select Distinct DISTRICT,TALUKA,VILLAGE from Water_Harvesting12092024`);
+        const response = await queryData(`select Distinct DISTRICT,TALUKA,VILLAGE from Water_Harvesting`);
         res.send({
             code:200,
             message:"Success",
@@ -188,24 +188,24 @@ app.get('/getDashboardValues', async (req, res) => {
 
     // Use parameterized queries to prevent SQL injection
     const talukasCountQuery = `SELECT COUNT(*) as Total_Distinct_Taluka_Count 
-                               FROM (SELECT DISTINCT TALUKA FROM Water_Harvesting12092024 WHERE DISTRICT = '${DISTRICT}') AS DistinctTalukas`;
+                               FROM (SELECT DISTINCT TALUKA FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}') AS DistinctTalukas`;
     
     const villageCountQuery = `SELECT COUNT(*) as Total_Distinct_Village_Count 
-                               FROM (SELECT DISTINCT VILLAGE FROM Water_Harvesting12092024 WHERE DISTRICT = '${DISTRICT}') AS DistinctVillages`;
+                               FROM (SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}') AS DistinctVillages`;
 
     const inaugrationCountQuery = `SELECT COUNT(*) as Total_Inaugration_Count 
-                               FROM (SELECT * FROM Water_Harvesting12092024 WHERE DISTRICT = '${DISTRICT}' AND Inauguration_DATE IS NOT NULL) AS DistinctVillages`;
+                               FROM (SELECT * FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}' AND Inauguration_DATE IS NOT NULL) AS DistinctVillages`;
     
     const completionCountQuery = `SELECT COUNT(*) as Total_completion_Count 
-                               FROM (SELECT * FROM Water_Harvesting12092024 WHERE DISTRICT = '${DISTRICT}' AND COMPLETED_DATE IS NOT NULL) AS DistinctVillages`;
+                               FROM (SELECT * FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}' AND COMPLETED_DATE IS NOT NULL) AS DistinctVillages`;
     
-    const totalTargetQuery = `SELECT COUNT(*) as Total_Target_Records FROM Water_Harvesting12092024 WHERE DISTRICT = '${DISTRICT}'`;
+    const totalTargetQuery = `SELECT COUNT(*) as Total_Target_Records FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}'`;
 
-    const getPieChartValue = `SELECT DISTINCT TALUKA,Count(*) as count FROM Water_Harvesting12092024 WHERE DISTRICT = '${DISTRICT}' GROUP BY TALUKA;`
+    const getPieChartValue = `SELECT DISTINCT TALUKA,Count(*) as count FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}' GROUP BY TALUKA;`
   
-    const totalCountQuery = `SELECT COUNT(*) as Total_Records FROM Water_Harvesting12092024`
+    const totalCountQuery = `SELECT COUNT(*) as Total_Records FROM Water_Harvesting`
 
-    const getStackedBarChartValue = `SELECT TALUKA, ENG_GRANT, COUNT(*) AS count FROM Water_Harvesting12092024 WHERE DISTRICT = '${DISTRICT}' GROUP BY TALUKA, ENG_GRANT;`
+    const getStackedBarChartValue = `SELECT TALUKA, GRANT_NAME, COUNT(*) AS count FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}' GROUP BY TALUKA, GRANT_NAME;`
  
     try {
         const [talukasCount, villageCount, inaugrationCount, completionCount, totalTargetCount, pieChart, stackedBarChar, totalCount] = await Promise.all([
@@ -252,7 +252,7 @@ app.get('/getAllTargets',async(req,res)=>{
 
     try {
         const response = await queryData(`
-            SELECT count(*) as District_Wise_Target from Water_Harvesting12092024 WHERE DISTRICT = '${DISTRICT}'
+            SELECT count(*) as District_Wise_Target from Water_Harvesting WHERE DISTRICT = '${DISTRICT}'
         `);
 
         res.send({
@@ -317,7 +317,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
         fs.unlinkSync(imagePath);
 
         // Generate the MSSQL insert query
-        const createQuery = generateMSSQLInsertQuery('Water_Harvesting12092024', body);
+        const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
         await queryData(createQuery);
 
         res.send({
@@ -398,7 +398,7 @@ app.post('/updateRecords', jsonParser, async (req, res) => {
             COMPLETED_PHOTO1: completionPhotoUrl
         };
         // Generate the MSSQL update query
-        const updateQuery = generateMSSQLUpdateQuery('Water_Harvesting12092024', updateObject, { ID });
+        const updateQuery = generateMSSQLUpdateQuery('Water_Harvesting', updateObject, { ID });
         console.log(updateQuery);
 
 
@@ -432,8 +432,8 @@ app.get('/fetchRecords', async (req, res) => {
       const conditionsString = conditions.join(' AND ');
   
       // Queries
-      const totalRecordsQuery = `SELECT COUNT(*) as totalRecords FROM Water_Harvesting12092024 ${conditionsString ? `WHERE ${conditionsString}` : ''}`;
-      const fetchTalukaRecordsQuery = `SELECT * FROM Water_Harvesting12092024 ${conditionsString ? `WHERE ${conditionsString}` : ''} ORDER BY ID`;
+      const totalRecordsQuery = `SELECT COUNT(*) as totalRecords FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''}`;
+      const fetchTalukaRecordsQuery = `SELECT * FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''} ORDER BY ID`;
   
       console.log(fetchTalukaRecordsQuery);
   
