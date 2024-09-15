@@ -28,12 +28,19 @@ app.use(cors());
 
 app.use(express.json({ limit: '50mb' }));
 
-function uploadImageToFTP(imagePath, imageName) {
+function uploadImageToFTP(imagePath, imageName, folderName) {
     return new Promise((resolve, reject) => {
         const client = new Client();
         
         client.on('ready', () => {
             console.log('FTP connection ready');
+
+            client.cwd(`/${folderName}`, (err) => {
+                if (err) {
+                    client.end();
+                    return reject(`Error changing directory: ${err.message}`);
+                }
+            })
 
             client.put(imagePath, imageName, (err) => {
                 if (err) {
@@ -43,7 +50,7 @@ function uploadImageToFTP(imagePath, imageName) {
                     console.log('File uploaded successfully');
 
                     // Construct the public URL
-                    const publicUrl = `http://jalshakti.co.in/${imageName}`;
+                    const publicUrl = `http://jalshakti.co.in/${folderName}/${imageName}`;
                     console.log('Publicly accessible URL:', publicUrl);
 
                     resolve(publicUrl);
@@ -308,7 +315,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
         fs.writeFileSync(imagePath, base64Data, { encoding: 'base64' });
 
         // Upload the image to FTP and get the public URL
-        const publicUrl = await uploadImageToFTP(imagePath, imageName);
+        const publicUrl = await uploadImageToFTP(imagePath, imageName, 'Groundwork');
 
         // Store the public URL in the request body
         body.Inauguration_PHOTO1 = publicUrl;
@@ -365,7 +372,7 @@ app.post('/updateRecords', jsonParser, async (req, res) => {
             const base64Data = inaugurationPhotoBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
             // Write the decoded base64 data as binary
             fs.writeFileSync(inaugurationImagePath, base64Data, { encoding: 'base64' });
-            inaugurationPhotoUrl = await uploadImageToFTP(inaugurationImagePath, imageName);
+            inaugurationPhotoUrl = await uploadImageToFTP(inaugurationImagePath, imageName, 'Groundwork');
             fs.unlinkSync(inaugurationImagePath); // Remove the temp file after upload
         }
 
@@ -386,7 +393,7 @@ app.post('/updateRecords', jsonParser, async (req, res) => {
             const base64Data = completionPhotoBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
             // Write the decoded base64 data as binary
             fs.writeFileSync(completionImagePath, base64Data, { encoding: 'base64' });
-            completionPhotoUrl = await uploadImageToFTP(completionImagePath, imageName);
+            completionPhotoUrl = await uploadImageToFTP(completionImagePath, imageName, 'Completion');
             console.log(completionImagePath);
             fs.unlinkSync(completionImagePath); // Remove the temp file after upload
         }
