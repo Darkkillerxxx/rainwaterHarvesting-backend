@@ -479,8 +479,8 @@ app.get('/fetchRecords', async (req, res) => {
 
   app.post('/login',async(req,res)=>{
     try{
-        const {username,password,taluka} = req.body;
-        const query = `Select * FROM tblUSER WHERE USR_NM = '${username}' AND USR_PWD = '${password}' AND taluka = '${taluka}'`;
+        const {username,password,taluka,district} = req.body;
+        const query = `Select * FROM tblUSER WHERE USR_NM = '${username}' AND USR_PWD = '${password}' AND taluka = '${taluka}' AND district='${district}'`;
 
         const response = await queryData(query);
         console.log(response.recordset);
