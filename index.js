@@ -406,11 +406,12 @@ app.post('/updateRecords', jsonParser, async (req, res) => {
         };
 
         Object.keys(updateObject).forEach((key)=>{
-            if(!updateObject[key] && updateObject[key]?.length === 0){
+            if(!updateObject[key] || updateObject[key]?.length === 0){
                 delete updateObject[key]
             }
         })
         // Generate the MSSQL update query
+        console.log(414,updateObject);
         const updateQuery = generateMSSQLUpdateQuery('Water_Harvesting', updateObject, { ID });
         console.log(updateQuery);
 
@@ -510,6 +511,6 @@ app.get('/fetchRecords', async (req, res) => {
     }
   })
 
-app.listen(process.env.PORT || 3000,()=>{
-    console.log(`App listening on port 3000`);
+app.listen(process.env.PORT || 3001,()=>{
+    console.log(`App listening on port 3001`);
 })
