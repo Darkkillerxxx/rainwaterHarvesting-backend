@@ -404,6 +404,12 @@ app.post('/updateRecords', jsonParser, async (req, res) => {
             Inauguration_PHOTO1: inaugurationPhotoUrl,
             COMPLETED_PHOTO1: completionPhotoUrl
         };
+
+        Object.keys(updateObject).forEach((key)=>{
+            if(!updateObject[key] && updateObject[key]?.length === 0){
+                delete updateObject[key]
+            }
+        })
         // Generate the MSSQL update query
         const updateQuery = generateMSSQLUpdateQuery('Water_Harvesting', updateObject, { ID });
         console.log(updateQuery);
