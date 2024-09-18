@@ -28,6 +28,35 @@ app.use(cors());
 
 app.use(express.json({ limit: '50mb' }));
 
+async function getSliderImages(){
+    const client = new Client();
+   
+    return new Promise((resolve, reject) => {
+        client.on('ready', () => {
+            // Change directory to the 'slider' folder
+            client.list('/Sliders', (err, list) => {
+                if (err) {
+                    console.error('Error fetching files:', err);
+                    return;
+                }
+                console.log('Files in slider folder:', list);
+                resolve(list);
+
+                
+                // End the connection
+                client.end();
+            });
+        });
+        
+        // Connect to the FTP server
+        client.connect({
+            host: 'ftp.jalshakti.co.in',
+            user: 'u428611290.jalshakti',
+            password: 'Jalshakti@2024'
+        });
+    });
+}
+
 function uploadImageToFTP(imagePath, imageName, folderName) {
     return new Promise((resolve, reject) => {
         const client = new Client();
@@ -509,6 +538,13 @@ app.get('/fetchRecords', async (req, res) => {
             message: error.message,
           });
     }
+  })
+
+  app.get('/getSliderImages',async(req,res)=>{
+    res.send({
+        code:200,
+        data:await getSliderImages()
+    });
   })
 
 app.listen(process.env.PORT || 3001,()=>{
