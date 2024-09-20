@@ -506,40 +506,57 @@ app.get('/fetchRecords', async (req, res) => {
   });
   
 
-  app.post('/login',async(req,res)=>{
-    try{
-        const {username,password,taluka,district} = req.body;
-        const query = `Select * FROM tblUSER WHERE USR_NM = '${username}' AND USR_PWD = '${password}' AND taluka = '${taluka}' AND district='${district}'`;
-
-        const response = await queryData(query);
-        console.log(response.recordset);
-
-        if(response && response.recordset.length > 0){
-            const userId = response.recordset.USR_ID
-            const accessToken = jwt.sign({ userId }, jwtSecret, {
-                expiresIn: "100000d",
-              });
-
-            res.send({
-                code:200,
-                message:"User Found",
-                token:accessToken              
-            })
-            return
-        }
+  app.post('/login', async (req, res) => {
+    try {
+      const { username, password, taluka, district } = req.body;
+  
+      // Initialize base query
+      let query = `SELECT * FROM tblUSER WHERE 1=1`;
+  
+      // Add conditions to the query dynamically based on non-null values
+      if (username) {
+        query += ` AND USR_NM = '${username}'`;
+      }
+      if (password) {
+        query += ` AND USR_PWD = '${password}'`;
+      }
+      if (taluka) {
+        query += ` AND taluka = '${taluka}'`;
+      }
+      if (district) {
+        query += ` AND district = '${district}'`;
+      }
+  
+      // Execute the query
+      const response = await queryData(query);
+      console.log(response.recordset);
+  
+      if (response && response.recordset.length > 0) {
+        const userId = response.recordset[0].USR_ID;
+        const accessToken = jwt.sign({ userId }, jwtSecret, {
+          expiresIn: "100000d",
+        });
+  
         res.send({
-            code:404,
-            message:"User Not Found"
-        })
+          code: 200,
+          message: "User Found",
+          token: accessToken,
+        });
+        return;
+      }
+  
+      res.send({
+        code: 404,
+        message: "User Not Found",
+      });
+    } catch (error) {
+      res.send({
+        code: 500,
+        message: error.message,
+      });
     }
-    catch(error){
-        res.send({
-            code: 500,
-            message: error.message,
-          });
-    }
-  })
-
+  });
+  
   app.get('/getSliderImages',async(req,res)=>{
     res.send({
         code:200,
