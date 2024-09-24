@@ -557,6 +557,7 @@ app.get('/fetchRecords', async (req, res) => {
     }
   });
   
+  
   app.get('/getSliderImages',async(req,res)=>{
     res.send({
         code:200,
@@ -564,6 +565,44 @@ app.get('/fetchRecords', async (req, res) => {
     });
   })
 
+  
+app.post('/register', async (req, res) => {
+    try {
+      const { username, password, email, isAdmin, isActive, district, taluka, userType } = req.body;
+  
+      // Convert boolean values to 1 (true) or 0 (false)
+      const isAdminValue = isAdmin ? 1 : 0;
+      const isActiveValue = isActive ? 1 : 0;
+  
+      // Generate a random number and create the combination value
+      const randomNumber = Math.floor(Math.random() * 10000); // 4-digit random number
+      const combinationValue = `${district}_${taluka}_${username}_${randomNumber}`;
+  
+      // Insert user data into the table
+      const query = `
+        INSERT INTO tblUSER (
+          USR_NM, USR_PWD, EMAIL_ID, isADMIN, isACTIVE, DISTRICT, TALUKA, USR_TYPE, USR_ID
+        ) VALUES (
+          '${username}', '${password}', '${email}', ${isAdminValue}, ${isActiveValue}, '${district}', '${taluka}', ${userType}, '${combinationValue}'
+        )
+      `;
+  
+      // Execute the query
+      console.log(query);
+      const response = await queryData(query);
+      
+      res.send({
+        code: 200,
+        message: "User Registered Successfully",
+      });
+    } catch (error) {
+      res.send({
+        code: 500,
+        message: error.message,
+      });
+    }
+  });
+  
 app.listen(process.env.PORT || 3001,()=>{
     console.log(`App listening on port 3001`);
 })
