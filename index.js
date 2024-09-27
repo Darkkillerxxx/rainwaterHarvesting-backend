@@ -354,6 +354,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
 
         // Generate the MSSQL insert query
         const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
+        console.log(createQuery);
         await queryData(createQuery);
 
         res.send({
@@ -408,6 +409,7 @@ app.post('/updateRecords', jsonParser, async (req, res) => {
         // Save and upload completion photo
         if (completionPhotoBase64) {
             const matches = completionPhotoBase64.match(/^data:image\/([a-zA-Z]+);base64,/);
+            console.log(412,matches);
             if (!matches || matches.length < 2) {
                 return res.status(400).send({
                     code: 400,
