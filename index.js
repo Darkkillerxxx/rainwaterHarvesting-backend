@@ -220,59 +220,64 @@ app.get('/getPicklistValues',async(req,res)=>{
 })
 
 app.get('/getDashboardValues', async (req, res) => {
-    const { DISTRICT } = req.query; // Get DISTRICT from query parameters
+  const { DISTRICT } = req.query;
 
-    // Use parameterized queries to prevent SQL injection
-    const talukasCountQuery = `SELECT COUNT(*) as Total_Distinct_Taluka_Count 
-                               FROM (SELECT DISTINCT TALUKA FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}') AS DistinctTalukas`;
-    
-    const villageCountQuery = `SELECT COUNT(*) as Total_Distinct_Village_Count 
-                               FROM (SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}') AS DistinctVillages`;
+  // Build base WHERE condition
+  let whereClause = DISTRICT ? `WHERE DISTRICT = '${DISTRICT}'` : '';
 
-    const inaugrationCountQuery = `SELECT COUNT(*) as Total_Inaugration_Count 
-                               FROM (SELECT * FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}' AND Inauguration_DATE IS NOT NULL) AS DistinctVillages`;
-    
-    const completionCountQuery = `SELECT COUNT(*) as Total_completion_Count 
-                               FROM (SELECT * FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}' AND COMPLETED_DATE IS NOT NULL) AS DistinctVillages`;
-    
-    const totalTargetQuery = `SELECT COUNT(*) as Total_Target_Records FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}'`;
+  // Add AND conditions only if DISTRICT is present
+  let inaugurationCondition = DISTRICT ? `AND Inauguration_DATE IS NOT NULL` : `WHERE Inauguration_DATE IS NOT NULL`;
+  let completionCondition = DISTRICT ? `AND COMPLETED_DATE IS NOT NULL` : `WHERE COMPLETED_DATE IS NOT NULL`;
 
-    const getPieChartValue = `SELECT DISTINCT TALUKA,Count(*) as count FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}' GROUP BY TALUKA;`
-  
-    const totalCountQuery = `SELECT COUNT(*) as Total_Records FROM Water_Harvesting`
+  // Updated queries with dynamic conditions
+  const talukasCountQuery = `SELECT COUNT(*) as Total_Distinct_Taluka_Count 
+                             FROM (SELECT DISTINCT TALUKA FROM Water_Harvesting ${whereClause}) AS DistinctTalukas`;
 
-    const getStackedBarChartValue = `SELECT TALUKA, GRANT_NAME, COUNT(*) AS count FROM Water_Harvesting WHERE DISTRICT = '${DISTRICT}' GROUP BY TALUKA, GRANT_NAME;`
- 
-    try {
-        const [talukasCount, villageCount, inaugrationCount, completionCount, totalTargetCount, pieChart, stackedBarChar, totalCount] = await Promise.all([
-            queryData(talukasCountQuery),
-            queryData(villageCountQuery),
-            queryData(inaugrationCountQuery),
-            queryData(completionCountQuery),
-            queryData(totalTargetQuery),
-            queryData(getPieChartValue),
-            queryData(getStackedBarChartValue),
-            queryData(totalCountQuery)
-        ]);
-        console.log(talukasCount);
-        const finalResponse = {
-            talukasCount:talukasCount.recordset[0].Total_Distinct_Taluka_Count,
-            villageCount:villageCount.recordset[0].Total_Distinct_Village_Count,
-            inaugrationCount:inaugrationCount.recordset[0].Total_Inaugration_Count,
-            completionCount:completionCount.recordset[0].Total_completion_Count,
-            totalTargetCount:totalTargetCount.recordset[0].Total_Target_Records,
-            totalRecordCount:totalCount.recordset[0].Total_Records,
-            pieChart:pieChart.recordset,
-            stackedBarChart:stackedBarChar.recordset        
-        }
-            // targetCount.recordset[0]
-        
+  const villageCountQuery = `SELECT COUNT(*) as Total_Distinct_Village_Count 
+                             FROM (SELECT DISTINCT VILLAGE FROM Water_Harvesting ${whereClause}) AS DistinctVillages`;
 
-        res.send(finalResponse);
-    } catch (error) {
-        console.error('Error querying database:', error);
-        res.status(500).send('Internal Server Error');
-    }
+  const inaugrationCountQuery = `SELECT COUNT(*) as Total_Inaugration_Count 
+                             FROM (SELECT * FROM Water_Harvesting ${whereClause} ${inaugurationCondition}) AS InauguratedProjects`;
+
+  const completionCountQuery = `SELECT COUNT(*) as Total_completion_Count 
+                             FROM (SELECT * FROM Water_Harvesting ${whereClause} ${completionCondition}) AS CompletedProjects`;
+
+  const totalTargetQuery = `SELECT COUNT(*) as Total_Target_Records FROM Water_Harvesting ${whereClause}`;
+
+  const getPieChartValue = `SELECT DISTINCT TALUKA, COUNT(*) as count FROM Water_Harvesting ${whereClause} GROUP BY TALUKA`;
+
+  const totalCountQuery = `SELECT COUNT(*) as Total_Records FROM Water_Harvesting`;
+
+  const getStackedBarChartValue = `SELECT TALUKA, GRANT_NAME, COUNT(*) AS count FROM Water_Harvesting ${whereClause} GROUP BY TALUKA, GRANT_NAME`;
+
+  try {
+      const [talukasCount, villageCount, inaugrationCount, completionCount, totalTargetCount, pieChart, stackedBarChar, totalCount] = await Promise.all([
+          queryData(talukasCountQuery),
+          queryData(villageCountQuery),
+          queryData(inaugrationCountQuery),
+          queryData(completionCountQuery),
+          queryData(totalTargetQuery),
+          queryData(getPieChartValue),
+          queryData(getStackedBarChartValue),
+          queryData(totalCountQuery)
+      ]);
+
+      const finalResponse = {
+          talukasCount: talukasCount.recordset[0].Total_Distinct_Taluka_Count,
+          villageCount: villageCount.recordset[0].Total_Distinct_Village_Count,
+          inaugrationCount: inaugrationCount.recordset[0].Total_Inaugration_Count,
+          completionCount: completionCount.recordset[0].Total_completion_Count,
+          totalTargetCount: totalTargetCount.recordset[0].Total_Target_Records,
+          totalRecordCount: totalCount.recordset[0].Total_Records,
+          pieChart: pieChart.recordset,
+          stackedBarChart: stackedBarChar.recordset        
+      };
+
+      res.send(finalResponse);
+  } catch (error) {
+      console.error('Error querying database:', error);
+      res.status(500).send('Internal Server Error');
+  }
 });
 
 
