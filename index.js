@@ -356,6 +356,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
 
         // Delete the local file after FTP upload
         fs.unlinkSync(imagePath);
+        body.LAST_UPD_DT = new Date();
 
         // Generate the MSSQL insert query
         const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
@@ -438,7 +439,8 @@ app.post('/updateRecords', jsonParser, async (req, res) => {
         const updateObject = {
             ...updateFields,
             Inauguration_PHOTO1: inaugurationPhotoUrl,
-            COMPLETED_PHOTO1: completionPhotoUrl
+            COMPLETED_PHOTO1: completionPhotoUrl,
+            LAST_UPD_DT: new Date()
         };
 
         Object.keys(updateObject).forEach((key)=>{
