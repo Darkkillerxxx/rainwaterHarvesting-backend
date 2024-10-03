@@ -627,10 +627,10 @@ app.post('/resetImage',async (req,res)=>{
     let query = `UPDATE Water_Harvesting SET`;
 
     if(type){
-      query = query + `SET Inauguration_PHOTO1 = NULL`
+      query = query + `Inauguration_PHOTO1 = NULL`
     }
     else{
-      query = query + `SET COMPLETED_PHOTO1 = NULL`
+      query = query + `COMPLETED_PHOTO1 = NULL`
     }
 
     query = query + `WHERE Id = '${recordId}'`;
