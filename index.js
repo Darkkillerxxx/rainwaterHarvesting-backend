@@ -622,6 +622,7 @@ app.listen(process.env.PORT || 3001,()=>{
 
 app.post('/resetImage',async (req,res)=>{
   try{
+    console.log(625,req.body)
     const { recordId, type } = req.body;
 
     let query = `UPDATE Water_Harvesting SET `;
