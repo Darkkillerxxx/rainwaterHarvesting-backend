@@ -633,7 +633,7 @@ app.post('/resetImage',async (req,res)=>{
       query = query + `COMPLETED_PHOTO1 = NULL`
     }
 
-    query = query + `WHERE Id = '${recordId}'`;
+    query = query + ` WHERE Id = '${recordId}'`;
 
     await queryData(query);
 
