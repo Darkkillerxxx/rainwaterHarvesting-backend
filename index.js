@@ -635,6 +635,7 @@ app.post('/resetImage',async (req,res)=>{
 
     query = query + ` WHERE Id = '${recordId}'`;
 
+    console.log(638,query)
     await queryData(query);
 
     res.send({
