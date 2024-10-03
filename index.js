@@ -624,7 +624,7 @@ app.post('/resetImage',async (req,res)=>{
   try{
     const { recordId, type } = req.body;
 
-    const query = `UPDATE Water_Harvesting SET`;
+    let query = `UPDATE Water_Harvesting SET`;
 
     if(type){
       query = query + `SET Inauguration_PHOTO1 = NULL`
