@@ -471,7 +471,7 @@ app.post('/updateRecords', jsonParser, async (req, res) => {
 
 app.get('/fetchRecords', async (req, res) => {
     try {
-      const { District, Village, Taluka, offSet } = req.query;
+      const { District, Village, Taluka, SearchText, ShowInaugurated, ShowCompleted } = req.query;
       // Initialize the conditions array
       const conditions = [];
   
@@ -479,7 +479,10 @@ app.get('/fetchRecords', async (req, res) => {
       if (District && District != 'null') conditions.push(`DISTRICT = '${District}'`);
       if (Village && Village != 'null') conditions.push(`VILLAGE = '${Village}'`);
       if (Taluka && Taluka != 'null') conditions.push(`TALUKA = '${Taluka}'`);
-  
+      if (SearchText && SearchText != 'null') conditions.push(`(DISTRICT LIKE '%${SearchText}%' OR TALUKA LIKE '%${SearchText}%' OR VILLAGE LIKE '%${SearchText}%')`);
+      if (ShowInaugurated === 'true') conditions.push(`Inauguration_DATE IS NOT NULL`);
+      if (ShowCompleted === 'true') conditions.push(`COMPLETED_DATE IS NOT NULL`);
+
       // Join the conditions with AND operator
       const conditionsString = conditions.join(' AND ');
   
@@ -614,4 +617,35 @@ app.post('/register', async (req, res) => {
   
 app.listen(process.env.PORT || 3001,()=>{
     console.log(`App listening on port 3001`);
+})
+
+
+app.post('/resetImage',async (req,res)=>{
+  try{
+    const { recordId, type } = req.body;
+
+    const query = `UPDATE Water_Harvesting SET`;
+
+    if(type){
+      query = query + `SET Inauguration_PHOTO1 = NULL`
+    }
+    else{
+      query = query + `SET COMPLETED_PHOTO1 = NULL`
+    }
+
+    query = query + `WHERE Id = '${recordId}'`;
+
+    await queryData(query);
+
+    return{
+      code:200,
+      message:'Done'
+    }
+
+  }catch(error){
+    res.send({
+      code: 500,
+      message: error.message,
+    });
+  }
 })
