@@ -637,10 +637,10 @@ app.post('/resetImage',async (req,res)=>{
 
     await queryData(query);
 
-    return{
+    res.send({
       code:200,
       message:'Done'
-    }
+    })
 
   }catch(error){
     res.send({
