@@ -520,7 +520,7 @@ app.get('/fetchRecords', async (req, res) => {
 
   app.post('/login', async (req, res) => {
     try {
-      const { username, password, taluka, district } = req.body;
+      const { username, password } = req.body;
   
       // Initialize base query
       let query = `SELECT * FROM tblUSER WHERE 1=1`;
@@ -532,12 +532,7 @@ app.get('/fetchRecords', async (req, res) => {
       if (password) {
         query += ` AND USR_PWD = '${password}'`;
       }
-      if (taluka) {
-        query += ` AND taluka = '${taluka}'`;
-      }
-      if (district) {
-        query += ` AND district = '${district}'`;
-      }
+     
   
       // Execute the query
       const response = await queryData(query);
@@ -553,6 +548,7 @@ app.get('/fetchRecords', async (req, res) => {
           code: 200,
           message: "User Found",
           token: accessToken,
+          userData:response.recordset[0]
         });
         return;
       }
