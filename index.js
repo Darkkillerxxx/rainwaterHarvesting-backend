@@ -204,11 +204,22 @@ app.get('/getAllDistrics',async(req,res)=>{
 
 app.get('/getPicklistValues',async(req,res)=>{
     try{
-        const response = await queryData(`select Distinct DISTRICT,TALUKA,VILLAGE from Water_Harvesting`);
+        const pickListvaluesQuery = `select Distinct DISTRICT,TALUKA,VILLAGE from Water_Harvesting`
+        const implementationAuthorityQuery = `SELECT * FROM mstImplimantationAuthority`
+        const fundsQuery = `SELECT * FROM mstFunds`
+
+        const [locationsValues,implementationAuthorityValues,fundsValues] = await Promise.all([
+          queryData(pickListvaluesQuery),
+          queryData(implementationAuthorityQuery),
+          queryData(fundsQuery)
+        ])
+
         res.send({
             code:200,
             message:"Success",
-            data:response.recordsets[0]
+            data:locationsValues.recordsets[0],
+            implementationAuthorityValues:implementationAuthorityValues.recordset,
+            fundsValues:fundsValues.recordset
         })
     }
     catch(error){
