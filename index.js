@@ -322,12 +322,28 @@ app.get('/getAllTargets',async(req,res)=>{
     }
 })
 
+const verifyToken = (token, secret) => {
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, secret, (err, decoded) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(decoded);
+    });
+  });
+};
 
 app.post('/createRecords', jsonParser, async (req, res) => {
-    const { body } = req;
+    const { body,headers } = req;
     const { Inauguration_PHOTO1 } = body; // Assume the base64 image is passed in this field
 
     try {
+
+       // Extract the access token from the 'Authorization' header
+        const authToken = headers['authorization'];
+        
+        const user = await verifyToken(authToken,process.env.JWTSECRET);
+        console.log(346,user);
         // Validate if Inauguration_PHOTO1 exists and is a valid base64 string
         if (!Inauguration_PHOTO1 || !Inauguration_PHOTO1.startsWith('data:image/')) {
             return res.status(400).send({
@@ -368,7 +384,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
         // Delete the local file after FTP upload
         fs.unlinkSync(imagePath);
         body.LAST_UPD_DT = new Date().toISOString();
-
+        body.CRE_USR_ID = user.userId;
         // Generate the MSSQL insert query
         const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
         console.log(createQuery);
@@ -550,7 +566,7 @@ app.get('/fetchRecords', async (req, res) => {
       console.log(response.recordset);
   
       if (response && response.recordset.length > 0) {
-        const userId = response.recordset[0].USR_ID;
+        const userId = response.recordset[0].ID;
         const accessToken = jwt.sign({ userId }, jwtSecret, {
           expiresIn: "100000d",
         });
