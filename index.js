@@ -341,7 +341,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
 
        // Extract the access token from the 'Authorization' header
         const authToken = headers['authorization'];
-        const token = authHeader && authHeader.split(' ')[1]; // Assuming the format is 'Bearer <token>'
+        const token = authToken && authToken.split(' ')[1]; // Assuming the format is 'Bearer <token>'
         
         const user = await verifyToken(token,process.env.JWTSECRET);
         console.log(346,user);
