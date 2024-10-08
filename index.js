@@ -341,8 +341,9 @@ app.post('/createRecords', jsonParser, async (req, res) => {
 
        // Extract the access token from the 'Authorization' header
         const authToken = headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1]; // Assuming the format is 'Bearer <token>'
         
-        const user = await verifyToken(authToken,process.env.JWTSECRET);
+        const user = await verifyToken(token,process.env.JWTSECRET);
         console.log(346,user);
         // Validate if Inauguration_PHOTO1 exists and is a valid base64 string
         if (!Inauguration_PHOTO1 || !Inauguration_PHOTO1.startsWith('data:image/')) {
@@ -501,8 +502,8 @@ app.get('/fetchRecords', async (req, res) => {
     try {
       const { District, Village, Taluka, SearchText, ShowInaugurated, ShowCompleted } = req.query;
       const { authorization } = req.headers;
-
-      const user = await verifyToken(authorization,process.env.JWTSECRET);
+      const token = authorization && authorization.split(' ')[1]
+      const user = await verifyToken(token,process.env.JWTSECRET);
 
       if(!user){
         res.send({
