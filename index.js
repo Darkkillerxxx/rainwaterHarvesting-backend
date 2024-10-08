@@ -386,7 +386,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
         fs.unlinkSync(imagePath);
         body.LAST_UPD_DT = new Date().toISOString();
         body.CRE_USR_ID = user.userId;
-        body.CRE_BY_ADMIN = user.isAdmin;
+        body.CRE_BY_ADMIN = user.isAdmin ? 1 : 0;
         // Generate the MSSQL insert query
         const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
         console.log(createQuery);
