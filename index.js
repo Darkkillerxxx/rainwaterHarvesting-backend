@@ -385,6 +385,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
         fs.unlinkSync(imagePath);
         body.LAST_UPD_DT = new Date().toISOString();
         body.CRE_USR_ID = user.userId;
+        body.CRE_BY_ADMIN = user.isAdmin;
         // Generate the MSSQL insert query
         const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
         console.log(createQuery);
@@ -499,6 +500,17 @@ app.post('/updateRecords', jsonParser, async (req, res) => {
 app.get('/fetchRecords', async (req, res) => {
     try {
       const { District, Village, Taluka, SearchText, ShowInaugurated, ShowCompleted } = req.query;
+      const { authorization } = req.headers;
+
+      const user = await verifyToken(authorization,process.env.JWTSECRET);
+
+      if(!user){
+        res.send({
+          code:400,
+          message:'Invalid User'
+        })
+      }
+
       // Initialize the conditions array
       const conditions = [];
   
@@ -510,6 +522,10 @@ app.get('/fetchRecords', async (req, res) => {
       if (ShowInaugurated === 'true') conditions.push(`Inauguration_DATE IS NOT NULL`);
       if (ShowCompleted === 'true') conditions.push(`COMPLETED_DATE IS NOT NULL`);
 
+      if(!user.isADMIN){
+        conditions.push(`(CRE_USR_ID = ${user.userId} OR CRE_BY_ADMIN = 1)`);
+      }
+
       // Join the conditions with AND operator
       const conditionsString = conditions.join(' AND ');
   
@@ -517,7 +533,7 @@ app.get('/fetchRecords', async (req, res) => {
       const totalRecordsQuery = `SELECT COUNT(*) as totalRecords FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''}`;
       const fetchTalukaRecordsQuery = `SELECT * FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''} ORDER BY ID`;
   
-      console.log(fetchTalukaRecordsQuery);
+      console.log(536,totalRecordsQuery);
   
       // Execute both queries in parallel using Promise.all
       const [totalRecords, fetchTalukaRecords] = await Promise.all([
@@ -567,7 +583,8 @@ app.get('/fetchRecords', async (req, res) => {
   
       if (response && response.recordset.length > 0) {
         const userId = response.recordset[0].ID;
-        const accessToken = jwt.sign({ userId }, jwtSecret, {
+        const isAdmin = response.recordset[0].isADMIN;
+        const accessToken = jwt.sign({ userId,isAdmin }, jwtSecret, {
           expiresIn: "100000d",
         });
   
