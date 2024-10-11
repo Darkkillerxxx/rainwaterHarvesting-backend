@@ -502,16 +502,19 @@ app.get('/fetchRecords', async (req, res) => {
     try {
       const { District, Village, Taluka, SearchText, ShowInaugurated, ShowCompleted } = req.query;
       const { authorization } = req.headers;
-      const token = authorization && authorization.split(' ')[1]
-      const user = await verifyToken(token,process.env.JWTSECRET);
+      const token = authorization && authorization?.split(' ')[1]
+      let user;
+      if(token){
+        user = await verifyToken(token,process.env.JWTSECRET);
 
-      if(!user){
-        res.send({
-          code:400,
-          message:'Invalid User'
-        })
+        if(!user){
+          res.send({
+            code:400,
+            message:'Invalid User'
+          })
+        }
       }
-
+      
       // Initialize the conditions array
       const conditions = [];
   
@@ -523,7 +526,7 @@ app.get('/fetchRecords', async (req, res) => {
       if (ShowInaugurated === 'true') conditions.push(`Inauguration_DATE IS NOT NULL`);
       if (ShowCompleted === 'true') conditions.push(`COMPLETED_DATE IS NOT NULL`);
 
-      if(!user.isADMIN){
+      if(user && !user.isADMIN){
         conditions.push(`(CRE_USR_ID = ${user.userId} OR CRE_BY_ADMIN = 1)`);
       }
 
