@@ -660,11 +660,6 @@ app.post('/register', async (req, res) => {
     }
   });
   
-app.listen(process.env.PORT || 3001,()=>{
-    console.log(`App listening on port 3001`);
-})
-
-
 app.post('/resetImage',async (req,res)=>{
   try{
     console.log(625,req.body)
@@ -695,4 +690,7 @@ app.post('/resetImage',async (req,res)=>{
       message: error.message,
     });
   }
+})
+app.listen(process.env.PORT || 1098,'0.0.0.0',()=>{
+  console.log(`App listening on port 3001`);
 })
