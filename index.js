@@ -527,7 +527,7 @@ app.get('/fetchRecords', async (req, res) => {
       if (ShowCompleted === 'true') conditions.push(`COMPLETED_DATE IS NOT NULL`);
 
       if(user && !user.isADMIN && user.USR_TYPE === 3){
-        conditions.push(`(CRE_USR_ID = ${user.userId} OR CRE_BY_ADMIN = 1)`);
+        conditions.push(`(CRE_USR_ID = ${user.userId})`);
       }
 
       // Join the conditions with AND operator
