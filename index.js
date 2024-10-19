@@ -525,7 +525,7 @@ app.get('/fetchRecords', async (req, res) => {
       if (SearchText && SearchText != 'null') conditions.push(`(DISTRICT LIKE '%${SearchText}%' OR TALUKA LIKE '%${SearchText}%' OR VILLAGE LIKE '%${SearchText}%')`);
       if (ShowInaugurated === 'true') conditions.push(`Inauguration_DATE IS NOT NULL`);
       if (ShowCompleted === 'true') conditions.push(`COMPLETED_DATE IS NOT NULL`);
-
+      console.log(528,user);
       if(user && !user.isADMIN && user.USR_TYPE === 3){
         conditions.push(`(CRE_USR_ID = ${user.userId})`);
       }
