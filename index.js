@@ -526,7 +526,7 @@ app.get('/fetchRecords', async (req, res) => {
       if (ShowInaugurated === 'true') conditions.push(`Inauguration_DATE IS NOT NULL`);
       if (ShowCompleted === 'true') conditions.push(`COMPLETED_DATE IS NOT NULL`);
 
-      if(user && !user.isADMIN){
+      if(user && !user.isADMIN && user.USR_TYPE === 3){
         conditions.push(`(CRE_USR_ID = ${user.userId} OR CRE_BY_ADMIN = 1)`);
       }
 
@@ -587,8 +587,9 @@ app.get('/fetchRecords', async (req, res) => {
   
       if (response && response.recordset.length > 0) {
         const userId = response.recordset[0].ID;
+        const userType = response.recordset[0].USR_TYPE;
         const isAdmin = response.recordset[0].isADMIN;
-        const accessToken = jwt.sign({ userId,isAdmin }, jwtSecret, {
+        const accessToken = jwt.sign({ userId,isAdmin,userType }, jwtSecret, {
           expiresIn: "100000d",
         });
   
