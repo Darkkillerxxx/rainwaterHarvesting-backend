@@ -757,9 +757,9 @@ app.get('/getTalukas', async (req, res) => {
 
 app.get('/getVillages', async (req, res) => {
   try {
-      const { District, Taluka } = req.query;
+      const { Taluka } = req.query;
 
-      if (!District || !Taluka) {
+      if (!Taluka) {
           return res.status(400).send({
               code: 400,
               message: "Both District and Taluka are required"
