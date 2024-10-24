@@ -533,7 +533,7 @@ app.get('/fetchRecords', async (req, res) => {
       const totalRecordsQuery = `SELECT COUNT(*) as totalRecords FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''}`;
       const fetchTalukaRecordsQuery = `SELECT * FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''} ORDER BY ID`;
   
-      console.log(536,totalRecordsQuery);
+      console.log(536,totalRecordsQuery,fetchTalukaRecordsQuery);
   
       // Execute both queries in parallel using Promise.all
       const [totalRecords, fetchTalukaRecords] = await Promise.all([
