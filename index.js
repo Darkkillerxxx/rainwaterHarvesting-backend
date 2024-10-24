@@ -766,7 +766,7 @@ app.get('/getVillages', async (req, res) => {
           });
       }
 
-      const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE DISTRICT = '${District}' AND TALUKA = '${Taluka}'`;
+      const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE TALUKA = '${Taluka}'`;
 
       const villages = await queryData(getVillagesQuery);
 
