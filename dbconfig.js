@@ -8,7 +8,7 @@ var connection = {
     pool:{
         max:10,
         min:0,
-        idleTimeoutMillis:30000000
+        idleTimeoutMillis:150000
     },
     options:{
         encrypt:false,
