@@ -202,33 +202,53 @@ app.get('/getAllDistrics',async(req,res)=>{
     })
 })
 
-app.get('/getPicklistValues',async(req,res)=>{
-    try{
-        const pickListvaluesQuery = `select Distinct DISTRICT,TALUKA,VILLAGE from Water_Harvesting`
-        const implementationAuthorityQuery = `SELECT * FROM mstImplimantationAuthority`
-        const fundsQuery = `SELECT * FROM mstFunds`
+app.get('/getPicklistValues', async (req, res) => {
+  try {
+      const { District, Taluka } = req.query;
 
-        const [locationsValues,implementationAuthorityValues,fundsValues] = await Promise.all([
+      // Start building the query
+      let pickListvaluesQuery = `SELECT DISTINCT DISTRICT, TALUKA, VILLAGE FROM Water_Harvesting`;
+
+      // Add conditions only if District or Taluka are provided
+      if (District || Taluka) {
+          pickListvaluesQuery += ' WHERE';
+
+          if (District) {
+              pickListvaluesQuery += ` DISTRICT = '${District}'`;  // Add District filter
+          }
+
+          if (Taluka) {
+              // If both District and Taluka are present, add 'AND' between them
+              if (District) pickListvaluesQuery += ' AND';
+              pickListvaluesQuery += ` TALUKA = '${Taluka}'`;  // Add Taluka filter
+          }
+      }
+
+      // Other queries remain the same
+      const implementationAuthorityQuery = `SELECT * FROM mstImplimantationAuthority`;
+      const fundsQuery = `SELECT * FROM mstFunds`;
+
+      const [locationsValues, implementationAuthorityValues, fundsValues] = await Promise.all([
           queryData(pickListvaluesQuery),
           queryData(implementationAuthorityQuery),
           queryData(fundsQuery)
-        ])
+      ]);
 
-        res.send({
-            code:200,
-            message:"Success",
-            data:locationsValues.recordsets[0],
-            implementationAuthorityValues:implementationAuthorityValues.recordset,
-            fundsValues:fundsValues.recordset
-        })
-    }
-    catch(error){
-        return {
-            code:500,
-            message:error.message
-        }
-    }
-})
+      res.send({
+          code: 200,
+          message: "Success",
+          data: locationsValues.recordset,  // Fixing recordsets[0] to recordset
+          implementationAuthorityValues: implementationAuthorityValues.recordset,
+          fundsValues: fundsValues.recordset
+      });
+  } catch (error) {
+      res.status(500).send({
+          code: 500,
+          message: error.message
+      });
+  }
+});
+
 
 app.get('/getDashboardValues', async (req, res) => {
   const { DISTRICT } = req.query;
