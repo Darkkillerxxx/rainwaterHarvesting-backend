@@ -707,6 +707,83 @@ app.post('/resetImage',async (req,res)=>{
     });
   }
 })
+
+app.get('/getDistricts', async (req, res) => {
+  try {
+      const getAllDistrictsQuery = `SELECT DISTINCT DISTRICT FROM Water_Harvesting`;
+
+      const districts = await queryData(getAllDistrictsQuery);
+
+      res.send({
+          code: 200,
+          message: "Success",
+          data: districts.recordset
+      });
+  } catch (error) {
+      res.status(500).send({
+          code: 500,
+          message: error.message
+      });
+  }
+});
+
+app.get('/getTalukas', async (req, res) => {
+  try {
+      const { District } = req.query;
+
+      if (!District) {
+          return res.status(400).send({
+              code: 400,
+              message: "District is required"
+          });
+      }
+
+      const getTalukasQuery = `SELECT DISTINCT TALUKA FROM Water_Harvesting WHERE DISTRICT = '${District}'`;
+
+      const talukas = await queryData(getTalukasQuery);
+
+      res.send({
+          code: 200,
+          message: "Success",
+          data: talukas.recordset
+      });
+  } catch (error) {
+      res.status(500).send({
+          code: 500,
+          message: error.message
+      });
+  }
+});
+
+app.get('/getVillages', async (req, res) => {
+  try {
+      const { District, Taluka } = req.query;
+
+      if (!District || !Taluka) {
+          return res.status(400).send({
+              code: 400,
+              message: "Both District and Taluka are required"
+          });
+      }
+
+      const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE DISTRICT = '${District}' AND TALUKA = '${Taluka}'`;
+
+      const villages = await queryData(getVillagesQuery);
+
+      res.send({
+          code: 200,
+          message: "Success",
+          data: villages.recordset
+      });
+  } catch (error) {
+      res.status(500).send({
+          code: 500,
+          message: error.message
+      });
+  }
+});
+
+
 app.listen(process.env.PORT || 1098,'0.0.0.0',()=>{
   console.log(`App listening on port 3001`);
 })
