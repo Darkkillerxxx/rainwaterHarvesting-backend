@@ -1,9 +1,9 @@
 import sql from 'mssql'
 
 var connection = {
-    server     : '83.229.87.8',
-    user     : 'EMS',
-    password : 'artisan$123',
+    server     : '103.116.176.242',
+    user     : 'yojna',
+    password : 'iis#2022',
     database : 'iVMS',
     pool:{
         max:10,

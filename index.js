@@ -788,5 +788,5 @@ app.get('/getVillages', async (req, res) => {
 
 
 app.listen(process.env.PORT || 1098,'0.0.0.0',()=>{
-  console.log(`App listening on port 3001`);
+  console.log(`App listening on port 1098`);
 })
