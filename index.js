@@ -711,8 +711,8 @@ app.post('/resetImage',async (req,res)=>{
 
 app.get('/getDistricts', async (req, res) => {
   try {
-      // const getAllDistrictsQuery = `SELECT DISTINCT DISTRICT FROM V_VILLAGE`;
-      const getAllDistrictsQuery = `SELECT DISTINCT DISTRICT FROM Water_Harvesting`;
+      const getAllDistrictsQuery = `SELECT DISTINCT DISTRICT FROM V_VILLAGE order by DISTRICT`;
+      //const getAllDistrictsQuery = `SELECT DISTINCT DISTRICT FROM Water_Harvesting`;
 
       const districts = await queryData(getAllDistrictsQuery);
 
