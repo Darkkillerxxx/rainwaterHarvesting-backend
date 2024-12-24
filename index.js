@@ -194,7 +194,8 @@ app.get('/getAllLocationForDistricts',async(req,res)=>{
 })
 
 app.get('/getAllDistrics',async(req,res)=>{
-    const response = await queryData(`select Distinct DISTRICT from Water_Harvesting`);
+   // const response = await queryData(`select Distinct DISTRICT from Water_Harvesting`);
+   const response = await queryData(`select Distinct DISTRICT from V_VILLAGE order by DISTRICT`);
     res.send({
         code:200,
         message:"Success",
@@ -739,8 +740,8 @@ app.get('/getTalukas', async (req, res) => {
           });
       }
 
-      // const getTalukasQuery = `SELECT DISTINCT TALUKA FROM V_VILLAGE WHERE DISTRICT = '${District}'`;
-      const getTalukasQuery = `SELECT DISTINCT TALUKA FROM Water_Harvesting WHERE DISTRICT = '${District}'`;
+       const getTalukasQuery = `SELECT DISTINCT TALUKA FROM V_VILLAGE WHERE DISTRICT = '${District}' order by TALUKA`;
+      //const getTalukasQuery = `SELECT DISTINCT TALUKA FROM Water_Harvesting WHERE DISTRICT = '${District}'`;
 
       const talukas = await queryData(getTalukasQuery);
 
@@ -768,8 +769,8 @@ app.get('/getVillages', async (req, res) => {
           });
       }
 
-      // const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM V_VILLAGE WHERE TALUKA = '${Taluka}'`;
-      const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE TALUKA = '${Taluka}'`;
+       const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM V_VILLAGE WHERE TALUKA = '${Taluka}' ORDER BY VILLAGE`;
+      //const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE TALUKA = '${Taluka}'`;
 
       const villages = await queryData(getVillagesQuery);
 
