@@ -710,7 +710,7 @@ app.post('/resetImage',async (req,res)=>{
 
 app.get('/getDistricts', async (req, res) => {
   try {
-      const getAllDistrictsQuery = `SELECT DISTINCT DISTRICT FROM Water_Harvesting`;
+      const getAllDistrictsQuery = `SELECT DISTINCT DISTRICT FROM V_VILLAGE`;
 
       const districts = await queryData(getAllDistrictsQuery);
 
@@ -738,7 +738,7 @@ app.get('/getTalukas', async (req, res) => {
           });
       }
 
-      const getTalukasQuery = `SELECT DISTINCT TALUKA FROM Water_Harvesting WHERE DISTRICT = '${District}'`;
+      const getTalukasQuery = `SELECT DISTINCT TALUKA FROM V_VILLAGE WHERE DISTRICT = '${District}'`;
 
       const talukas = await queryData(getTalukasQuery);
 
@@ -766,7 +766,7 @@ app.get('/getVillages', async (req, res) => {
           });
       }
 
-      const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE TALUKA = '${Taluka}'`;
+      const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM V_VILLAGE WHERE TALUKA = '${Taluka}'`;
 
       const villages = await queryData(getVillagesQuery);
 
