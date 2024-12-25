@@ -786,7 +786,24 @@ app.get('/getVillages', async (req, res) => {
       });
   }
 });
+app.get('/getReportList', async (req, res) => {
+  try {
+        const getReportListQuery = `SELECT * FROM [iVMS].[dbo].[tblReport] order by id`;
 
+      const ReportList = await queryData(getReportListQuery);
+
+      res.send({
+          code: 200,
+          message: "Success",
+          data: ReportList.recordset
+      });
+  } catch (error) {
+      res.status(500).send({
+          code: 500,
+          message: error.message
+      });
+  }
+});
 
 app.listen(process.env.PORT || 1098,'0.0.0.0',()=>{
   console.log(`App listening on port 1098`);
