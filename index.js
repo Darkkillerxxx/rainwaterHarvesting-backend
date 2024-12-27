@@ -891,7 +891,7 @@ app.get('/getReportData', async (req, res) => {
       if (!REPORTTYPE) {
           return res.status(400).send({
               code: 400,
-              message: "Report type is  required1234546 !"
+              message: `Report type is  required321 ${REPORTTYPE} !`
           });
       }
 
@@ -899,11 +899,12 @@ app.get('/getReportData', async (req, res) => {
       //const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE TALUKA = '${Taluka}'`;
        const getReportQuery = `SELECT REPORT_QUERY FROM [iVMS].[dbo].[tblReport] where REPORT_TYPE='${REPORTTYPE}'`;
       const QueryData = await queryData(getReportQuery);
-
+      const qdata = QueryData.recordset[0]?.REPORT_QUERY || ''; // Gets first column (REPORT_QUERY) from first row
+      const QueryData1 = await queryData(qdata);
       res.send({
           code: 200,
-          message: "Success",
-          data: QueryData.recordset
+          message: `Success `,
+          data: QueryData1.recordset 
       });
   } catch (error) {
       res.status(500).send({
