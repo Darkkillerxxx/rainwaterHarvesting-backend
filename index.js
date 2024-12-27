@@ -886,18 +886,18 @@ app.get('/getReportList', async (req, res) => {
 });
 app.get('/getReportData', async (req, res) => {
   try {
-      const {REPORT_TYPE} = req.query;
+      const {REPORTTYPE} = req.query;
 
-      if (!REPORT_TYPE) {
+      if (!REPORTTYPE) {
           return res.status(400).send({
               code: 400,
-              message: "Report type is  required1234 !"
+              message: "Report type is  required1234546 !"
           });
       }
 
       //  const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM V_VILLAGE WHERE TALUKA = '${Taluka}' ORDER BY VILLAGE`;
       //const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE TALUKA = '${Taluka}'`;
-       const getReportQuery = `SELECT REPORT_QUERY FROM [iVMS].[dbo].[tblReport] where REPORT_TYPE='${REPORT_TYPE}'`
+       const getReportQuery = `SELECT REPORT_QUERY FROM [iVMS].[dbo].[tblReport] where REPORT_TYPE='${REPORTTYPE}'`;
       const QueryData = await queryData(getReportQuery);
 
       res.send({
