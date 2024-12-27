@@ -886,12 +886,12 @@ app.get('/getReportList', async (req, res) => {
 });
 app.get('/getReportData', async (req, res) => {
   try {
-      const { REPORT_TYPE } = req.query;
+      const {REPORT_TYPE} = req.query;
 
       if (!REPORT_TYPE) {
           return res.status(400).send({
               code: 400,
-              message: "Report type is  required !"
+              message: "Report type is  required1234 !"
           });
       }
 
