@@ -434,6 +434,86 @@ app.post('/createRecords', jsonParser, async (req, res) => {
 });
 
 
+app.post('/AddRecords', jsonParser, async (req, res) => {
+  const { body,headers } = req;
+  const { Inauguration_PHOTO1 } = body; // Assume the base64 image is passed in this field
+
+  try {
+
+     // Extract the access token from the 'Authorization' header
+      const authToken = headers['authorization'];
+      const token = authToken && authToken.split(' ')[1]; // Assuming the format is 'Bearer <token>'
+      
+      const user = await verifyToken(token,process.env.JWTSECRET);
+      console.log(346,user);
+      // Validate if Inauguration_PHOTO1 exists and is a valid base64 string
+      if (!Inauguration_PHOTO1 || !Inauguration_PHOTO1.startsWith('data:image/')) {
+          return res.status(400).send({
+              code: 400,
+              message: 'Invalid or missing base64 image data',
+          });
+      }
+
+      // Generate a random number for the image name
+      const randomNumber = Math.floor(Math.random() * 1000000);
+      const imageName = `Inauguration_${randomNumber}.png`;
+
+      // Determine image type (png, jpeg, etc.)
+      const matches = Inauguration_PHOTO1.match(/^data:image\/([a-zA-Z]+);base64,/);
+      if (!matches || matches.length < 2) {
+          return res.status(400).send({
+              code: 400,
+              message: 'Invalid image format',
+          });
+      }
+      const imageType = matches[1]; // Extract the image type (png, jpeg, etc.)
+
+      // Construct the file name with the correct extension
+      const imagePath = `./Inauguration_${randomNumber}.${imageType}`;
+
+      // Remove any whitespaces or newlines that may corrupt the image
+      const base64Data = Inauguration_PHOTO1.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
+
+      // Write the decoded base64 data as binary
+      fs.writeFileSync(imagePath, base64Data, { encoding: 'base64' });
+
+      // Upload the image to FTP and get the public URL
+      const publicUrl = await uploadImageToFTP(imagePath, imageName, 'Groundwork');
+
+      // Store the public URL in the request body
+      body.Inauguration_PHOTO1 = publicUrl;
+
+      // Delete the local file after FTP upload
+      fs.unlinkSync(imagePath);
+      body.LAST_UPD_DT = new Date().toISOString();
+      body.CRE_USR_DT = new Date().toISOString();
+      body.CRE_USR_ID = user.userId;
+      body.CRE_BY_ADMIN = user.isAdmin ? 1 : 0;
+      // Generate the MSSQL insert query
+      const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
+      console.log(createQuery);
+      await queryData(createQuery);
+
+      res.send({
+          code: 200,
+          message: 'Data Created',
+      });
+
+  } catch (error) {
+      console.error('Error:', error);
+
+      // In case of an error, clean up the local file if it exists
+      if (fs.existsSync(imagePath)) {
+          fs.unlinkSync(imagePath);
+      }
+
+      res.status(500).send({
+          code: 500,
+          message: 'Error processing request',
+      });
+  }
+});
+
 app.post('/updateRecords', jsonParser, async (req, res) => {
     try {
         const { body } = req;
@@ -804,7 +884,34 @@ app.get('/getReportList', async (req, res) => {
       });
   }
 });
+app.get('/getReportData', async (req, res) => {
+  try {
+      const { REPORT_TYPE } = req.query;
 
+      if (!REPORT_TYPE) {
+          return res.status(400).send({
+              code: 400,
+              message: "Report type is  required !"
+          });
+      }
+
+      //  const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM V_VILLAGE WHERE TALUKA = '${Taluka}' ORDER BY VILLAGE`;
+      //const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE TALUKA = '${Taluka}'`;
+       const getReportQuery = `SELECT REPORT_QUERY FROM [iVMS].[dbo].[tblReport] where REPORT_TYPE='${REPORT_TYPE}'`
+      const QueryData = await queryData(getReportQuery);
+
+      res.send({
+          code: 200,
+          message: "Success",
+          data: QueryData.recordset
+      });
+  } catch (error) {
+      res.status(500).send({
+          code: 500,
+          message: error.message
+      });
+  }
+});
 app.listen(process.env.PORT || 1098,'0.0.0.0',()=>{
   console.log(`App listening on port 1098`);
 })
