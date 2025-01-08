@@ -601,85 +601,93 @@ app.post('/updateRecords', jsonParser, async (req, res) => {
 
 app.post('/newupdateRecords', jsonParser, async (req, res) => {
   try {
-    const { body } = req;
-    const { inaugurationPhotoBase64, completionPhotoBase64, ID, Approx_Amount, Latitude, Longitude, ...updateFields } = body;
+      const { body } = req;
+      const { inaugurationPhotoBase64, completionPhotoBase64, ID, Approx_Amount, Latitude, Longitude, ...updateFields } = body;
 
-    let inaugurationPhotoUrl = null;
-    let completionPhotoUrl = null;
-    const randomNumber = Math.floor(Math.random() * 1000000);
+      let inaugurationPhotoUrl = null;
+      let completionPhotoUrl = null;
+      const randomNumber = Date.now(); // Use a timestamp for uniqueness
 
-    // Save and upload inauguration photo
-    if (inaugurationPhotoBase64) {
-      const matches = inaugurationPhotoBase64.match(/^data:image\/([a-zA-Z]+);base64,/);
-      if (!matches || matches.length < 2) {
-        return res.status(400).send({
-          code: 400,
-          message: 'Invalid image format',
-        });
+      // Validate numeric fields
+      const numericFields = { Approx_Amount, Latitude, Longitude };
+      Object.keys(numericFields).forEach((key) => {
+          const value = numericFields[key];
+          if (value != null && isNaN(value)) {
+              return res.status(400).send({
+                  code: 400,
+                  message: `Invalid value for ${key}: must be a number.`,
+              });
+          }
+      });
+
+      // Save and upload inauguration photo
+      if (inaugurationPhotoBase64) {
+          const matches = inaugurationPhotoBase64.match(/^data:image\/([a-zA-Z]+);base64,/);
+          if (!matches || matches.length < 2) {
+              return res.status(400).send({ code: 400, message: 'Invalid image format' });
+          }
+          const imageType = matches[1];
+          const imageName = `Inauguration_${randomNumber}.${imageType}`;
+          const inaugurationImagePath = path.join(__dirname, imageName);
+          const base64Data = inaugurationPhotoBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
+          fs.writeFileSync(inaugurationImagePath, base64Data, { encoding: 'base64' });
+          inaugurationPhotoUrl = await uploadImageToFTP(inaugurationImagePath, imageName, 'Groundwork');
+          fs.unlinkSync(inaugurationImagePath);
       }
-      const imageType = matches[1];
-      const imageName = `Inauguration_${randomNumber}.${imageType}`;
-      const inaugurationImagePath = path.join(__dirname, imageName);
-      const base64Data = inaugurationPhotoBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
-      fs.writeFileSync(inaugurationImagePath, base64Data, { encoding: 'base64' });
-      inaugurationPhotoUrl = await uploadImageToFTP(inaugurationImagePath, imageName, 'Groundwork');
-      fs.unlinkSync(inaugurationImagePath);
-    }
 
-    // Save and upload completion photo
-    if (completionPhotoBase64) {
-      const matches = completionPhotoBase64.match(/^data:image\/([a-zA-Z]+);base64,/);
-      if (!matches || matches.length < 2) {
-        return res.status(400).send({
-          code: 400,
-          message: 'Invalid image format',
-        });
+      // Save and upload completion photo
+      if (completionPhotoBase64) {
+          const matches = completionPhotoBase64.match(/^data:image\/([a-zA-Z]+);base64,/);
+          if (!matches || matches.length < 2) {
+              return res.status(400).send({ code: 400, message: 'Invalid image format' });
+          }
+          const imageType = matches[1];
+          const imageName = `Completion_${randomNumber}.${imageType}`;
+          const completionImagePath = path.join(__dirname, imageName);
+          const base64Data = completionPhotoBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
+          fs.writeFileSync(completionImagePath, base64Data, { encoding: 'base64' });
+          completionPhotoUrl = await uploadImageToFTP(completionImagePath, imageName, 'Completion');
+          fs.unlinkSync(completionImagePath);
       }
-      const imageType = matches[1];
-      const imageName = `Completion_${randomNumber}.${imageType}`;
-      const completionImagePath = path.join(__dirname, imageName);
-      const base64Data = completionPhotoBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
-      fs.writeFileSync(completionImagePath, base64Data, { encoding: 'base64' });
-      completionPhotoUrl = await uploadImageToFTP(completionImagePath, imageName, 'Completion');
-      fs.unlinkSync(completionImagePath);
-    }
 
-    // Prepare the update object
-    const updateObject = {
-      ...updateFields,
-      Inauguration_PHOTO1: inaugurationPhotoUrl,
-      COMPLETED_PHOTO1: completionPhotoUrl,
-      APPROX_AMOUNT: Approx_Amount,
-      Latitude: Latitude,
-      Longitude: Longitude,
-      LAST_UPD_DT: new Date().toISOString(),
-    };
+      // Prepare the update object
+      const updateObject = {
+          ...updateFields,
+          Approx_Amount: Approx_Amount != null ? parseFloat(Approx_Amount) : null,
+          Latitude: Latitude != null ? parseFloat(Latitude) : null,
+          Longitude: Longitude != null ? parseFloat(Longitude) : null,
+          Inauguration_PHOTO1: inaugurationPhotoUrl,
+          COMPLETED_PHOTO1: completionPhotoUrl,
+          LAST_UPD_DT: new Date().toISOString(),
+      };
 
-    // Remove empty or undefined fields from updateObject
-    Object.keys(updateObject).forEach((key) => {
-      if (!updateObject[key] || updateObject[key]?.length === 0) {
-        delete updateObject[key];
-      }
-    });
+      Object.keys(updateObject).forEach((key) => {
+          if (updateObject[key] == null || (typeof updateObject[key] === 'string' && updateObject[key].trim() === '')) {
+              delete updateObject[key];
+          }
+      });
 
-    // Generate the MSSQL update query
-    const updateQuery = generateMSSQLUpdateQuery('Water_Harvesting', updateObject, { ID });
+      // Generate and execute the MSSQL update query
+      const updateQuery = generateMSSQLUpdateQuery('Water_Harvesting', updateObject, { ID });
+      await queryData(updateQuery);
 
-    // Execute the query
-    await queryData(updateQuery);
-
-    // Respond to the client
-    res.send({
-      code: 200,
-      message: 'Data updated successfully',
-      inaugurationPhotoUrl,
-      completionPhotoUrl,
-    });
+      // Respond to the client
+      res.send({
+          code: 200,
+          message: 'Data updated successfully',
+          inaugurationPhotoUrl,
+          completionPhotoUrl,
+      });
   } catch (error) {
-    console.log(error);
-    res.status(500).send({ code: 500, message: 'Error updating data', error });
+      console.error('Error updating records:', error);
+      res.status(500).send({
+          code: 500,
+          message: 'Error updating data. Please try again later.',
+          error: error.message || 'Unknown error',
+      });
   }
 });
+
 
 app.get('/fetchRecords', async (req, res) => {
     try {
