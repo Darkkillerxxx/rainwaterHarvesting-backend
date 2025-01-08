@@ -602,7 +602,7 @@ app.post('/updateRecords', jsonParser, async (req, res) => {
 app.post('/newupdateRecords', jsonParser, async (req, res) => {
   try {
     const { body } = req;
-    const { inaugurationPhotoBase64, completionPhotoBase64, ID, funds, latitude, longitude, ...updateFields } = body;
+    const { inaugurationPhotoBase64, completionPhotoBase64, ID, Approx_Amount , Latitude, Longitude, ...updateFields } = body;
 
     let inaugurationPhotoUrl = null;
     let completionPhotoUrl = null;
