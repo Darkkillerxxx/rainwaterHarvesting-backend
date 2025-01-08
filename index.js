@@ -509,7 +509,7 @@ app.post('/AddRecords', jsonParser, async (req, res) => {
 
       res.status(500).send({
           code: 500,
-          message: 'Error processing request',
+          message: 'Error processing request',error,
       });
   }
 });
@@ -536,7 +536,7 @@ app.post('/AddNewRecords', jsonParser, async (req, res) => {
 
       // Generate a random number for the image name
       const randomNumber = Math.floor(Math.random() * 1000000);
-      const imageName = `Inauguration_${randomNumber}.png`;
+      const imageName = `StartPhoto_${randomNumber}.png`;
 
       // Determine image type (png, jpeg, etc.)
       const matches = StartWorkImg.match(/^data:image\/([a-zA-Z]+);base64,/);
@@ -549,7 +549,7 @@ app.post('/AddNewRecords', jsonParser, async (req, res) => {
       const imageType = matches[1]; // Extract the image type (png, jpeg, etc.)
 
       // Construct the file name with the correct extension
-      const imagePath = `./Inauguration_${randomNumber}.${imageType}`;
+      const imagePath = `./StartPhoto_${randomNumber}.${imageType}`;
 
       // Remove any whitespaces or newlines that may corrupt the image
       const base64Data = StartWorkImg.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
@@ -558,7 +558,7 @@ app.post('/AddNewRecords', jsonParser, async (req, res) => {
       fs.writeFileSync(imagePath, base64Data, { encoding: 'base64' });
 
       // Upload the image to FTP and get the public URL
-      const publicUrl = await uploadImageToFTP(imagePath, imageName, 'Groundwork');
+      const publicUrl = await uploadImageToFTP(imagePath, imageName, 'StartWork');
 
       // Store the public URL in the request body
       body.Inauguration_PHOTO1 = publicUrl;
@@ -573,7 +573,23 @@ app.post('/AddNewRecords', jsonParser, async (req, res) => {
       const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
       console.log(createQuery);
       await queryData(createQuery);
-
+//Created by Jagdish
+    // Example route with validation
+    // Validate and convert numeric fields
+        const numericFields = ['Latitude', 'Longitude', 'APPROX_AMOUNT'];
+        const data = {};
+        
+        for (const field of numericFields) {
+            if (req.body[field] === null) {
+            data[field] = null;
+            } else {
+            const num = Number(req.body[field]);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric value for ${field}`);
+            }
+            data[field] = num;
+            }
+        }
       res.send({
           code: 200,
           message: 'Success! The New record was added to the system.',
