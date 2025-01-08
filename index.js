@@ -649,9 +649,9 @@ app.post('/newupdateRecords', jsonParser, async (req, res) => {
       ...updateFields,
       Inauguration_PHOTO1: inaugurationPhotoUrl,
       COMPLETED_PHOTO1: completionPhotoUrl,
-      Approx_Amount: funds,
-      Latitude: latitude,
-      Longitude: longitude,
+      Approx_Amount:Approx_Amount,
+      Latitude: Latitude,
+      Longitude: Longitude,
       LAST_UPD_DT: new Date().toISOString(),
     };
 
