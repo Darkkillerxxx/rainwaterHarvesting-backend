@@ -405,7 +405,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
 
         // Delete the local file after FTP upload
         fs.unlinkSync(imagePath);
-        body.LAST_UPD_DT = new Date().toISOString();
+        body.CRE_USR_DT = new Date().toISOString();
         body.CRE_USR_ID = user.userId;
         body.CRE_BY_ADMIN = user.isAdmin ? 1 : 0;
         // Generate the MSSQL insert query
@@ -489,6 +489,23 @@ app.post('/AddRecords', jsonParser, async (req, res) => {
       body.CRE_USR_DT = new Date().toISOString();
       body.CRE_USR_ID = user.userId;
       body.CRE_BY_ADMIN = user.isAdmin ? 1 : 0;
+      //Created by Jagdish
+        // Example route with validation
+        // Validate and convert numeric fields
+        const numericFields = ['Latitude', 'Longitude', 'APPROX_AMOUNT'];
+        const data = {};
+        
+        for (const field of numericFields) {
+            if (req.body[field] === null) {
+            data[field] = null;
+            } else {
+            const num = Number(req.body[field]);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric value for ${field}`);
+            }
+            data[field] = num;
+            }
+        }
       // Generate the MSSQL insert query
       const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
       console.log(createQuery);
