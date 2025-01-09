@@ -602,14 +602,14 @@ app.post('/updateRecords', jsonParser, async (req, res) => {
 app.post('/newupdateRecords', jsonParser, async (req, res) => {
   try {
       const { body } = req;
-      const { inaugurationPhotoBase64, completionPhotoBase64, ID, Approx_Amount, Latitude, Longitude, ...updateFields } = body;
+      const { inaugurationPhotoBase64, completionPhotoBase64, ID, APPROX_AMOUNT, Latitude, Longitude, ...updateFields } = body;
 
       let inaugurationPhotoUrl = null;
       let completionPhotoUrl = null;
       const randomNumber = Date.now(); // Use a timestamp for uniqueness
 
       // Validate numeric fields
-      const numericFields = { Approx_Amount, Latitude, Longitude };
+      const numericFields = { APPROX_AMOUNT, Latitude, Longitude };
       Object.keys(numericFields).forEach((key) => {
           const value = numericFields[key];
           if (value != null && isNaN(value)) {
@@ -653,7 +653,7 @@ app.post('/newupdateRecords', jsonParser, async (req, res) => {
       // Prepare the update object
       const updateObject = {
           ...updateFields,
-          Approx_Amount: Approx_Amount != null ? parseFloat(Approx_Amount) : null,
+          APPROX_AMOUNT: APPROX_AMOUNT != null ? parseFloat(Approx_Amount) : null,
           Latitude: Latitude != null ? parseFloat(Latitude) : null,
           Longitude: Longitude != null ? parseFloat(Longitude) : null,
           Inauguration_PHOTO1: inaugurationPhotoUrl,
