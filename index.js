@@ -748,7 +748,7 @@ app.post('/newupdateRecords', jsonParser, async (req, res) => {
       // Prepare the update object
       const updateObject = {
           ...updateFields,
-          APPROX_AMOUNT: APPROX_AMOUNT != null ? parseFloat(Approx_Amount) : null,
+          APPROX_AMOUNT: APPROX_AMOUNT != null ? parseFloat(APPROX_AMOUNT) : null,
           Latitude: Latitude != null ? parseFloat(Latitude) : null,
           Longitude: Longitude != null ? parseFloat(Longitude) : null,
           Inauguration_PHOTO1: inaugurationPhotoUrl,
