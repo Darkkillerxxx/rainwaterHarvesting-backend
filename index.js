@@ -408,6 +408,13 @@ app.post('/createRecords', jsonParser, async (req, res) => {
         body.LAST_UPD_DT = new Date().toISOString();
         body.CRE_USR_ID = user.userId;
         body.CRE_BY_ADMIN = user.isAdmin ? 1 : 0;
+
+        // Capitalize all data fields in the body .. updated by SUMIT
+        for (const key in body) {
+            if (typeof body[key] === 'string') {
+                body[key] = body[key].toUpperCase();
+            }
+        }
         // Generate the MSSQL insert query
         const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
         console.log(createQuery);
