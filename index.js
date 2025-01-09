@@ -376,7 +376,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
 
         // Generate a random number for the image name
         const randomNumber = Math.floor(Math.random() * 1000000);
-        const imageName = `Inauguration_${randomNumber}.png`;
+        const imageName = `StartWork_${randomNumber}.png`;
 
         // Determine image type (png, jpeg, etc.)
         const matches = Inauguration_PHOTO1.match(/^data:image\/([a-zA-Z]+);base64,/);
@@ -389,7 +389,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
         const imageType = matches[1]; // Extract the image type (png, jpeg, etc.)
 
         // Construct the file name with the correct extension
-        const imagePath = `./Inauguration_${randomNumber}.${imageType}`;
+        const imagePath = `./StartWork_${randomNumber}.${imageType}`;
 
         // Remove any whitespaces or newlines that may corrupt the image
         const base64Data = Inauguration_PHOTO1.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
@@ -398,7 +398,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
         fs.writeFileSync(imagePath, base64Data, { encoding: 'base64' });
 
         // Upload the image to FTP and get the public URL
-        const publicUrl = await uploadImageToFTP(imagePath, imageName, 'Groundwork');
+        const publicUrl = await uploadImageToFTP(imagePath, imageName, 'StartWork');
 
         // Store the public URL in the request body
         body.Inauguration_PHOTO1 = publicUrl;
@@ -415,88 +415,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
                 body[key] = body[key].toUpperCase();
             }
         }
-        // Generate the MSSQL insert query
-        const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
-        console.log(createQuery);
-        await queryData(createQuery);
-
-        res.send({
-            code: 200,
-            message: 'Data Created',
-        });
-
-    } catch (error) {
-        console.error('Error:', error);
-
-        // In case of an error, clean up the local file if it exists
-        if (fs.existsSync(imagePath)) {
-            fs.unlinkSync(imagePath);
-        }
-
-        res.status(500).send({
-            code: 500,
-            message: 'Error processing request',
-        });
-    }
-});
-
-
-app.post('/AddRecords', jsonParser, async (req, res) => {
-  const { body,headers } = req;
-  const { Inauguration_PHOTO1 } = body; // Assume the base64 image is passed in this field
-
-  try {
-
-     // Extract the access token from the 'Authorization' header
-      const authToken = headers['authorization'];
-      const token = authToken && authToken.split(' ')[1]; // Assuming the format is 'Bearer <token>'
-      
-      const user = await verifyToken(token,process.env.JWTSECRET);
-      console.log(346,user);
-      // Validate if Inauguration_PHOTO1 exists and is a valid base64 string
-      if (!Inauguration_PHOTO1 || !Inauguration_PHOTO1.startsWith('data:image/')) {
-          return res.status(400).send({
-              code: 400,
-              message: 'Invalid or missing base64 image data',
-          });
-      }
-
-      // Generate a random number for the image name
-      const randomNumber = Math.floor(Math.random() * 1000000);
-      const imageName = `Inauguration_${randomNumber}.png`;
-
-      // Determine image type (png, jpeg, etc.)
-      const matches = Inauguration_PHOTO1.match(/^data:image\/([a-zA-Z]+);base64,/);
-      if (!matches || matches.length < 2) {
-          return res.status(400).send({
-              code: 400,
-              message: 'Invalid image format',
-          });
-      }
-      const imageType = matches[1]; // Extract the image type (png, jpeg, etc.)
-
-      // Construct the file name with the correct extension
-      const imagePath = `./Inauguration_${randomNumber}.${imageType}`;
-
-      // Remove any whitespaces or newlines that may corrupt the image
-      const base64Data = Inauguration_PHOTO1.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
-
-      // Write the decoded base64 data as binary
-      fs.writeFileSync(imagePath, base64Data, { encoding: 'base64' });
-
-      // Upload the image to FTP and get the public URL
-      const publicUrl = await uploadImageToFTP(imagePath, imageName, 'Groundwork');
-
-      // Store the public URL in the request body
-      body.Inauguration_PHOTO1 = publicUrl;
-
-      // Delete the local file after FTP upload
-      fs.unlinkSync(imagePath);
-      body.LAST_UPD_DT = new Date().toISOString();
-      body.CRE_USR_DT = new Date().toISOString();
-      body.CRE_USR_ID = user.userId;
-      body.CRE_BY_ADMIN = user.isAdmin ? 1 : 0;
-      //Created by Jagdish
+         //Created by Jagdish
         // Example route with validation
         // Validate and convert numeric fields
         const numericFields = ['Latitude', 'Longitude', 'APPROX_AMOUNT'];
@@ -513,126 +432,223 @@ app.post('/AddRecords', jsonParser, async (req, res) => {
             data[field] = num;
             }
         }
-      // Generate the MSSQL insert query
-      const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
-      console.log(createQuery);
-      await queryData(createQuery);
+        // Generate the MSSQL insert query
+        const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
+        console.log(createQuery);
+        await queryData(createQuery);
 
-      res.send({
-          code: 200,
-          message: 'Data Created',
-      });
+        res.send({
+            code: 200,
+            message: 'Success! The record was added to the system.',
+        });
 
-  } catch (error) {
-      console.error('Error:', error);
+    } catch (error) {
+        console.error('Error:', error);
 
-      // In case of an error, clean up the local file if it exists
-      if (fs.existsSync(imagePath)) {
-          fs.unlinkSync(imagePath);
-      }
-
-      res.status(500).send({
-          code: 500,
-          message: 'Error processing request',error,
-      });
-  }
-});
-//Created by Jagdish
-app.post('/AddNewRecords', jsonParser, async (req, res) => {
-  const { body,headers } = req;
-  const { StartWorkImg } = body; // Assume the base64 image is passed in this field
-
-  try {
-
-     // Extract the access token from the 'Authorization' header
-      const authToken = headers['authorization'];
-      const token = authToken && authToken.split(' ')[1]; // Assuming the format is 'Bearer <token>'
-      
-      const user = await verifyToken(token,process.env.JWTSECRET);
-      console.log(346,user);
-      // Validate if Inauguration_PHOTO1 exists and is a valid base64 string
-      if (!StartWorkImg || !StartWorkImg.startsWith('data:image/')) {
-          return res.status(400).send({
-              code: 400,
-              message: 'Invalid or missing base64 image data',
-          });
-      }
-
-      // Generate a random number for the image name
-      const randomNumber = Math.floor(Math.random() * 1000000);
-      const imageName = `StartPhoto_${randomNumber}.png`;
-
-      // Determine image type (png, jpeg, etc.)
-      const matches = StartWorkImg.match(/^data:image\/([a-zA-Z]+);base64,/);
-      if (!matches || matches.length < 2) {
-          return res.status(400).send({
-              code: 400,
-              message: 'Invalid image format',
-          });
-      }
-      const imageType = matches[1]; // Extract the image type (png, jpeg, etc.)
-
-      // Construct the file name with the correct extension
-      const imagePath = `./StartPhoto_${randomNumber}.${imageType}`;
-
-      // Remove any whitespaces or newlines that may corrupt the image
-      const base64Data = StartWorkImg.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
-
-      // Write the decoded base64 data as binary
-      fs.writeFileSync(imagePath, base64Data, { encoding: 'base64' });
-
-      // Upload the image to FTP and get the public URL
-      const publicUrl = await uploadImageToFTP(imagePath, imageName, 'StartWork');
-
-      // Store the public URL in the request body
-      body.Inauguration_PHOTO1 = publicUrl;
-
-      // Delete the local file after FTP upload
-      fs.unlinkSync(imagePath);
-      body.LAST_UPD_DT = new Date().toISOString();
-      body.CRE_USR_DT = new Date().toISOString();
-      body.CRE_USR_ID = user.userId;
-      body.CRE_BY_ADMIN = user.isAdmin ? 1 : 0;
-      // Generate the MSSQL insert query
-      const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
-      console.log(createQuery);
-      await queryData(createQuery);
-//Created by Jagdish
-    // Example route with validation
-    // Validate and convert numeric fields
-        const numericFields = ['Latitude', 'Longitude', 'APPROX_AMOUNT'];
-        const data = {};
-        
-        for (const field of numericFields) {
-            if (req.body[field] === null) {
-            data[field] = null;
-            } else {
-            const num = Number(req.body[field]);
-            if (isNaN(num)) {
-                throw new Error(`Invalid numeric value for ${field}`);
-            }
-            data[field] = num;
-            }
+        // In case of an error, clean up the local file if it exists
+        if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
         }
-      res.send({
-          code: 200,
-          message: 'Success! The New record was added to the system.',
-      });
 
-  } catch (error) {
-      console.error('Error:', error);
-
-      // In case of an error, clean up the local file if it exists
-      if (fs.existsSync(imagePath)) {
-          fs.unlinkSync(imagePath);
-      }
-
-      res.status(500).send({
-          code: 500,
-          message: 'Error processing request',error,
-      });
-  }
+        res.status(500).send({
+            code: 500,
+            message: 'Error processing request',error,
+        });
+    }
 });
+
+// app.post('/AddRecords', jsonParser, async (req, res) => {
+//   const { body,headers } = req;
+//   const { Inauguration_PHOTO1 } = body; // Assume the base64 image is passed in this field
+
+//   try {
+
+//      // Extract the access token from the 'Authorization' header
+//       const authToken = headers['authorization'];
+//       const token = authToken && authToken.split(' ')[1]; // Assuming the format is 'Bearer <token>'
+      
+//       const user = await verifyToken(token,process.env.JWTSECRET);
+//       console.log(346,user);
+//       // Validate if Inauguration_PHOTO1 exists and is a valid base64 string
+//       if (!Inauguration_PHOTO1 || !Inauguration_PHOTO1.startsWith('data:image/')) {
+//           return res.status(400).send({
+//               code: 400,
+//               message: 'Invalid or missing base64 image data',
+//           });
+//       }
+
+//       // Generate a random number for the image name
+//       const randomNumber = Math.floor(Math.random() * 1000000);
+//       const imageName = `Inauguration_${randomNumber}.png`;
+
+//       // Determine image type (png, jpeg, etc.)
+//       const matches = Inauguration_PHOTO1.match(/^data:image\/([a-zA-Z]+);base64,/);
+//       if (!matches || matches.length < 2) {
+//           return res.status(400).send({
+//               code: 400,
+//               message: 'Invalid image format',
+//           });
+//       }
+//       const imageType = matches[1]; // Extract the image type (png, jpeg, etc.)
+
+//       // Construct the file name with the correct extension
+//       const imagePath = `./Inauguration_${randomNumber}.${imageType}`;
+
+//       // Remove any whitespaces or newlines that may corrupt the image
+//       const base64Data = Inauguration_PHOTO1.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
+
+//       // Write the decoded base64 data as binary
+//       fs.writeFileSync(imagePath, base64Data, { encoding: 'base64' });
+
+//       // Upload the image to FTP and get the public URL
+//       const publicUrl = await uploadImageToFTP(imagePath, imageName, 'Groundwork');
+
+//       // Store the public URL in the request body
+//       body.Inauguration_PHOTO1 = publicUrl;
+
+//       // Delete the local file after FTP upload
+//       fs.unlinkSync(imagePath);
+//       body.LAST_UPD_DT = new Date().toISOString();
+//       body.CRE_USR_DT = new Date().toISOString();
+//       body.CRE_USR_ID = user.userId;
+//       body.CRE_BY_ADMIN = user.isAdmin ? 1 : 0;
+//       //Created by Jagdish
+//         // Example route with validation
+//         // Validate and convert numeric fields
+//         const numericFields = ['Latitude', 'Longitude', 'APPROX_AMOUNT'];
+//         const data = {};
+        
+//         for (const field of numericFields) {
+//             if (req.body[field] === null) {
+//             data[field] = null;
+//             } else {
+//             const num = Number(req.body[field]);
+//             if (isNaN(num)) {
+//                 throw new Error(`Invalid numeric value for ${field}`);
+//             }
+//             data[field] = num;
+//             }
+//         }
+//       // Generate the MSSQL insert query
+//       const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
+//       console.log(createQuery);
+//       await queryData(createQuery);
+
+//       res.send({
+//           code: 200,
+//           message: 'Data Created',
+//       });
+
+//   } catch (error) {
+//       console.error('Error:', error);
+
+//       // In case of an error, clean up the local file if it exists
+//       if (fs.existsSync(imagePath)) {
+//           fs.unlinkSync(imagePath);
+//       }
+
+//       res.status(500).send({
+//           code: 500,
+//           message: 'Error processing request',error,
+//       });
+//   }
+// });
+// //Created by Jagdish
+// app.post('/AddNewRecords', jsonParser, async (req, res) => {
+//   const { body,headers } = req;
+//   const { StartWorkImg } = body; // Assume the base64 image is passed in this field
+
+//   try {
+
+//      // Extract the access token from the 'Authorization' header
+//       const authToken = headers['authorization'];
+//       const token = authToken && authToken.split(' ')[1]; // Assuming the format is 'Bearer <token>'
+      
+//       const user = await verifyToken(token,process.env.JWTSECRET);
+//       console.log(346,user);
+//       // Validate if Inauguration_PHOTO1 exists and is a valid base64 string
+//       if (!StartWorkImg || !StartWorkImg.startsWith('data:image/')) {
+//           return res.status(400).send({
+//               code: 400,
+//               message: 'Invalid or missing base64 image data',
+//           });
+//       }
+
+//       // Generate a random number for the image name
+//       const randomNumber = Math.floor(Math.random() * 1000000);
+//       const imageName = `StartPhoto_${randomNumber}.png`;
+
+//       // Determine image type (png, jpeg, etc.)
+//       const matches = StartWorkImg.match(/^data:image\/([a-zA-Z]+);base64,/);
+//       if (!matches || matches.length < 2) {
+//           return res.status(400).send({
+//               code: 400,
+//               message: 'Invalid image format',
+//           });
+//       }
+//       const imageType = matches[1]; // Extract the image type (png, jpeg, etc.)
+
+//       // Construct the file name with the correct extension
+//       const imagePath = `./StartPhoto_${randomNumber}.${imageType}`;
+
+//       // Remove any whitespaces or newlines that may corrupt the image
+//       const base64Data = StartWorkImg.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
+
+//       // Write the decoded base64 data as binary
+//       fs.writeFileSync(imagePath, base64Data, { encoding: 'base64' });
+
+//       // Upload the image to FTP and get the public URL
+//       const publicUrl = await uploadImageToFTP(imagePath, imageName, 'StartWork');
+
+//       // Store the public URL in the request body
+//       body.Inauguration_PHOTO1 = publicUrl;
+
+//       // Delete the local file after FTP upload
+//       fs.unlinkSync(imagePath);
+//       body.LAST_UPD_DT = new Date().toISOString();
+//       body.CRE_USR_DT = new Date().toISOString();
+//       body.CRE_USR_ID = user.userId;
+//       body.CRE_BY_ADMIN = user.isAdmin ? 1 : 0;
+//       // Generate the MSSQL insert query
+//       const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
+//       console.log(createQuery);
+//       await queryData(createQuery);
+// //Created by Jagdish
+//     // Example route with validation
+//     // Validate and convert numeric fields
+//         const numericFields = ['Latitude', 'Longitude', 'APPROX_AMOUNT'];
+//         const data = {};
+        
+//         for (const field of numericFields) {
+//             if (req.body[field] === null) {
+//             data[field] = null;
+//             } else {
+//             const num = Number(req.body[field]);
+//             if (isNaN(num)) {
+//                 throw new Error(`Invalid numeric value for ${field}`);
+//             }
+//             data[field] = num;
+//             }
+//         }
+//       res.send({
+//           code: 200,
+//           message: 'Success! The New record was added to the system.',
+//       });
+
+//   } catch (error) {
+//       console.error('Error:', error);
+
+//       // In case of an error, clean up the local file if it exists
+//       if (fs.existsSync(imagePath)) {
+//           fs.unlinkSync(imagePath);
+//       }
+
+//       res.status(500).send({
+//           code: 500,
+//           message: 'Error processing request',error,
+//       });
+//   }
+// });
 app.post('/updateRecords', jsonParser, async (req, res) => {
     try {
         const { body } = req;
