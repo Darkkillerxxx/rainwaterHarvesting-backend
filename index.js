@@ -405,7 +405,8 @@ app.post('/createRecords', jsonParser, async (req, res) => {
 
         // Delete the local file after FTP upload
         fs.unlinkSync(imagePath);
-        body.CRE_USR_DT = new Date().toISOString();
+        body.CRE_USR_DT =new Date(new Date().toLocaleString('en-US', {timeZone: 'Asia/Kolkata'})).toISOString();
+        // new Date().toISOString();
         body.CRE_USR_ID = user.userId;
         body.CRE_BY_ADMIN = user.isAdmin ? 1 : 0;
 
