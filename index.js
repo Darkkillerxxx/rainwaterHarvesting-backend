@@ -817,7 +817,7 @@ app.post('/newupdateRecords', jsonParser, async (req, res) => {
           Inauguration_PHOTO1: inaugurationPhotoUrl,
           COMPLETED_PHOTO1: completionPhotoUrl,
           LAST_UPD_ID : user.userId,
-          LAST_UPD_DT: new Date().toLocaleString(),
+          LAST_UPD_DT: new Date().toLocaleString()
       };
 
       Object.keys(updateObject).forEach((key) => {
