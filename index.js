@@ -389,7 +389,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
         const imageType = matches[1]; // Extract the image type (png, jpeg, etc.)
 
         // Construct the file name with the correct extension
-        const imagePath = `./StartWork_${randomNumber}.${imageType}`;
+        const imagePath = `./Inauguration_${randomNumber}.${imageType}`;
 
         // Remove any whitespaces or newlines that may corrupt the image
         const base64Data = Inauguration_PHOTO1.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
@@ -398,7 +398,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
         fs.writeFileSync(imagePath, base64Data, { encoding: 'base64' });
 
         // Upload the image to FTP and get the public URL
-        const publicUrl = await uploadImageToFTP(imagePath, imageName, 'StartWork');
+        const publicUrl = await uploadImageToFTP(imagePath, imageName, 'Groundwork');
 
         // Store the public URL in the request body
         body.Inauguration_PHOTO1 = publicUrl;
