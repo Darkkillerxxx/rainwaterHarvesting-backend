@@ -816,7 +816,8 @@ app.post('/newupdateRecords', jsonParser, async (req, res) => {
           Longitude: Longitude != null ? parseFloat(Longitude) : null,
           Inauguration_PHOTO1: inaugurationPhotoUrl,
           COMPLETED_PHOTO1: completionPhotoUrl,
-          LAST_UPD_DT: new Date().toISOString(),
+          LAST_UPD_DT: new Date(new Date().toLocaleString('en-US', {timeZone: 'Asia/Kolkata'})).toISOString()
+          //new Date().toISOString(),
       };
 
       Object.keys(updateObject).forEach((key) => {
