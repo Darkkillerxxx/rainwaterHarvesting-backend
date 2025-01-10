@@ -376,7 +376,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
 
         // Generate a random number for the image name
         const randomNumber = Math.floor(Math.random() * 1000000);
-        const imageName = `StartWork_${randomNumber}.png`;
+        const imageName = `Inauguration_${randomNumber}.png`;
 
         // Determine image type (png, jpeg, etc.)
         const matches = Inauguration_PHOTO1.match(/^data:image\/([a-zA-Z]+);base64,/);
@@ -418,20 +418,20 @@ app.post('/createRecords', jsonParser, async (req, res) => {
          //Created by Jagdish
         // Example route with validation
         // Validate and convert numeric fields
-        const numericFields = ['Latitude', 'Longitude', 'APPROX_AMOUNT'];
-        const data = {};
+        // const numericFields = ['Latitude', 'Longitude', 'APPROX_AMOUNT'];
+        // const data = {};
         
-        for (const field of numericFields) {
-            if (req.body[field] === null) {
-            data[field] = null;
-            } else {
-            const num = Number(req.body[field]);
-            if (isNaN(num)) {
-                throw new Error(`Invalid numeric value for ${field}`);
-            }
-            data[field] = num;
-            }
-        }
+        // for (const field of numericFields) {
+        //     if (req.body[field] === null) {
+        //     data[field] = null;
+        //     } else {
+        //     const num = Number(req.body[field]);
+        //     if (isNaN(num)) {
+        //         throw new Error(`Invalid numeric value for ${field}`);
+        //     }
+        //     data[field] = num;
+        //     }
+        // }
         // Generate the MSSQL insert query
         const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
         console.log(createQuery);
@@ -713,6 +713,29 @@ app.post('/updateRecords', jsonParser, async (req, res) => {
                 delete updateObject[key]
             }
         })
+          // Capitalize all data fields in the body .. updated by SUMIT
+          for (const key in body) {
+            if (typeof body[key] === 'string') {
+                body[key] = body[key].toUpperCase();
+            }
+        }
+         //Created by Jagdish
+        // Example route with validation
+        // Validate and convert numeric fields
+        const numericFields = ['Latitude', 'Longitude', 'APPROX_AMOUNT'];
+        const data = {};
+        
+        for (const field of numericFields) {
+            if (req.body[field] === null) {
+            data[field] = null;
+            } else {
+            const num = Number(req.body[field]);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric value for ${field}`);
+            }
+            data[field] = num;
+            }
+        }
         // Generate the MSSQL update query
         console.log(414,updateObject);
         const updateQuery = generateMSSQLUpdateQuery('Water_Harvesting', updateObject, { ID });
