@@ -789,7 +789,7 @@ app.post('/newupdateRecords', jsonParser, async (req, res) => {
           const inaugurationImagePath = path.join(__dirname, imageName);
           const base64Data = inaugurationPhotoBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
           fs.writeFileSync(inaugurationImagePath, base64Data, { encoding: 'base64' });
-          inaugurationPhotoUrl = await uploadImageToFTP(inaugurationImagePath, imageName, 'Startwork');
+          inaugurationPhotoUrl = await uploadImageToFTP(inaugurationImagePath, imageName, 'StartWork');
           fs.unlinkSync(inaugurationImagePath);
       }
 
