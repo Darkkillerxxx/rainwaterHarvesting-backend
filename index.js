@@ -816,7 +816,7 @@ app.post('/newupdateRecords', jsonParser, async (req, res) => {
           Longitude: Longitude != null ? parseFloat(Longitude) : null,
           Inauguration_PHOTO1: inaugurationPhotoUrl,
           COMPLETED_PHOTO1: completionPhotoUrl,
-          LAST_UPD_DT: new Date(),
+          LAST_UPD_DT: new Date().toISOString(),
       };
 
       Object.keys(updateObject).forEach((key) => {
@@ -832,7 +832,7 @@ app.post('/newupdateRecords', jsonParser, async (req, res) => {
       // Respond to the client
       res.send({
           code: 200,
-          message: 'Data updated successfully',
+          message: 'Data updated successfully',LAST_UPD_DT,
           inaugurationPhotoUrl,
           completionPhotoUrl,
       });
