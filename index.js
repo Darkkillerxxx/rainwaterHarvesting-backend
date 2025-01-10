@@ -376,7 +376,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
 
         // Generate a random number for the image name
         const randomNumber = Math.floor(Math.random() * 1000000);
-        const imageName = `Inauguration_${randomNumber}.png`;
+        const imageName = `StartWorkPhoto_${randomNumber}.png`;
 
         // Determine image type (png, jpeg, etc.)
         const matches = Inauguration_PHOTO1.match(/^data:image\/([a-zA-Z]+);base64,/);
@@ -389,7 +389,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
         const imageType = matches[1]; // Extract the image type (png, jpeg, etc.)
 
         // Construct the file name with the correct extension
-        const imagePath = `./Inauguration_${randomNumber}.${imageType}`;
+        const imagePath = `./StartWorkPhoto_${randomNumber}.${imageType}`;
 
         // Remove any whitespaces or newlines that may corrupt the image
         const base64Data = Inauguration_PHOTO1.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
@@ -398,7 +398,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
         fs.writeFileSync(imagePath, base64Data, { encoding: 'base64' });
 
         // Upload the image to FTP and get the public URL
-        const publicUrl = await uploadImageToFTP(imagePath, imageName, 'Groundwork');
+        const publicUrl = await uploadImageToFTP(imagePath, imageName, 'StartWork');
 
         // Store the public URL in the request body
         body.Inauguration_PHOTO1 = publicUrl;
@@ -418,20 +418,20 @@ app.post('/createRecords', jsonParser, async (req, res) => {
          //Created by Jagdish
         // Example route with validation
         // Validate and convert numeric fields
-        // const numericFields = ['Latitude', 'Longitude', 'APPROX_AMOUNT'];
-        // const data = {};
+        const numericFields = ['Latitude', 'Longitude', 'APPROX_AMOUNT'];
+        const data = {};
         
-        // for (const field of numericFields) {
-        //     if (req.body[field] === null) {
-        //     data[field] = null;
-        //     } else {
-        //     const num = Number(req.body[field]);
-        //     if (isNaN(num)) {
-        //         throw new Error(`Invalid numeric value for ${field}`);
-        //     }
-        //     data[field] = num;
-        //     }
-        // }
+        for (const field of numericFields) {
+            if (req.body[field] === null) {
+            data[field] = null;
+            } else {
+            const num = Number(req.body[field]);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric value for ${field}`);
+            }
+            data[field] = num;
+            }
+        }
         // Generate the MSSQL insert query
         const createQuery = generateMSSQLInsertQuery('Water_Harvesting', body);
         console.log(createQuery);
@@ -479,7 +479,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
 
 //       // Generate a random number for the image name
 //       const randomNumber = Math.floor(Math.random() * 1000000);
-//       const imageName = `Inauguration_${randomNumber}.png`;
+//       const imageName = `StartWorkPhoto_${randomNumber}.png`;
 
 //       // Determine image type (png, jpeg, etc.)
 //       const matches = Inauguration_PHOTO1.match(/^data:image\/([a-zA-Z]+);base64,/);
@@ -492,7 +492,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
 //       const imageType = matches[1]; // Extract the image type (png, jpeg, etc.)
 
 //       // Construct the file name with the correct extension
-//       const imagePath = `./Inauguration_${randomNumber}.${imageType}`;
+//       const imagePath = `./StartWorkPhoto_${randomNumber}.${imageType}`;
 
 //       // Remove any whitespaces or newlines that may corrupt the image
 //       const base64Data = Inauguration_PHOTO1.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
@@ -501,7 +501,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
 //       fs.writeFileSync(imagePath, base64Data, { encoding: 'base64' });
 
 //       // Upload the image to FTP and get the public URL
-//       const publicUrl = await uploadImageToFTP(imagePath, imageName, 'Groundwork');
+//       const publicUrl = await uploadImageToFTP(imagePath, imageName, 'Startwork');
 
 //       // Store the public URL in the request body
 //       body.Inauguration_PHOTO1 = publicUrl;
@@ -667,13 +667,13 @@ app.post('/updateRecords', jsonParser, async (req, res) => {
                 });
             }
             const imageType = matches[1]; 
-            const imageName = `Inauguration_${randomNumber}.${imageType}`;
+            const imageName = `StartWorkPhoto_${randomNumber}.${imageType}`;
             const inaugurationImagePath = path.join(__dirname, imageName);
             // Remove any whitespaces or newlines from the base64 string
             const base64Data = inaugurationPhotoBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
             // Write the decoded base64 data as binary
             fs.writeFileSync(inaugurationImagePath, base64Data, { encoding: 'base64' });
-            inaugurationPhotoUrl = await uploadImageToFTP(inaugurationImagePath, imageName, 'Groundwork');
+            inaugurationPhotoUrl = await uploadImageToFTP(inaugurationImagePath, imageName, 'Startwork');
             fs.unlinkSync(inaugurationImagePath); // Remove the temp file after upload
         }
 
@@ -785,11 +785,11 @@ app.post('/newupdateRecords', jsonParser, async (req, res) => {
               return res.status(400).send({ code: 400, message: 'Invalid image format' });
           }
           const imageType = matches[1];
-          const imageName = `Inauguration_${randomNumber}.${imageType}`;
+          const imageName = `StartWork_${randomNumber}.${imageType}`;
           const inaugurationImagePath = path.join(__dirname, imageName);
           const base64Data = inaugurationPhotoBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, '').replace(/\s/g, '');
           fs.writeFileSync(inaugurationImagePath, base64Data, { encoding: 'base64' });
-          inaugurationPhotoUrl = await uploadImageToFTP(inaugurationImagePath, imageName, 'Groundwork');
+          inaugurationPhotoUrl = await uploadImageToFTP(inaugurationImagePath, imageName, 'Startwork');
           fs.unlinkSync(inaugurationImagePath);
       }
 
