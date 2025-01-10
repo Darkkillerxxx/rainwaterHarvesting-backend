@@ -817,11 +817,10 @@ app.post('/newupdateRecords', jsonParser, async (req, res) => {
           Longitude: Longitude != null ? parseFloat(Longitude) : null,
           Inauguration_PHOTO1: inaugurationPhotoUrl,
           COMPLETED_PHOTO1: completionPhotoUrl,
-          LAST_UPD_DT: new Date(new Date().toLocaleString('en-US', {timeZone: 'Asia/Kolkata'})).toISOString(),
-          LAST_UPD_ID:user.userId
+          LAST_UPD_DT: new Date(new Date().toLocaleString('en-US', {timeZone: 'Asia/Kolkata'})).toISOString()
           //new Date().toISOString(),
       };
-    //  body.CRE_USR_ID = user.userId;
+    //  body.LAST_UPD_ID = user.userId;
       Object.keys(updateObject).forEach((key) => {
           if (updateObject[key] == null || (typeof updateObject[key] === 'string' && updateObject[key].trim() === '')) {
               delete updateObject[key];
