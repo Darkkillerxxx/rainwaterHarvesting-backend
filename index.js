@@ -705,7 +705,7 @@ app.post('/updateRecords', jsonParser, async (req, res) => {
             ...updateFields,
             Inauguration_PHOTO1: inaugurationPhotoUrl,
             COMPLETED_PHOTO1: completionPhotoUrl,
-            LAST_UPD_DT: new Date().toISOString()
+            LAST_UPD_DT: new Date()
         };
 
         Object.keys(updateObject).forEach((key)=>{
