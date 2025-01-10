@@ -410,11 +410,11 @@ app.post('/createRecords', jsonParser, async (req, res) => {
         body.CRE_BY_ADMIN = user.isAdmin ? 1 : 0;
 
         // Capitalize all data fields in the body .. updated by SUMIT
-        for (const key in body) {
-            if (typeof body[key] === 'string') {
-                body[key] = body[key].toUpperCase();
-            }
-        }
+        // for (const key in body) {
+        //     if (typeof body[key] === 'string') {
+        //         body[key] = body[key].toUpperCase();
+        //     }
+        // }
          //Created by Jagdish
         // Example route with validation
         // Validate and convert numeric fields
