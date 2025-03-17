@@ -911,7 +911,63 @@ app.get('/fetchRecords', async (req, res) => {
     }
   });
   
+  app.get('/fetchStatus', async (req, res) => {
+    try {
+      const { District, Village, Taluka, SearchText, ShowInaugurated, ShowCompleted } = req.query;
+      const { authorization } = req.headers;
+      const token = authorization && authorization?.split(' ')[1]
+      let user;
+      if(token){
+        user = await verifyToken(token,process.env.JWTSECRET);
 
+        if(!user){
+          res.send({
+            code:400,
+            message:'Invalid User'
+          })
+        }
+      }
+      
+      // Initialize the conditions array
+      const conditions = [];
+  
+      // Add conditions if the values are not null
+      if (District && District != 'null') conditions.push(`DISTRICT = '${District}'`);
+      if (Village && Village != 'null') conditions.push(`VILLAGE = '${Village}'`);
+      if (Taluka && Taluka != 'null') conditions.push(`TALUKA = '${Taluka}'`);
+      if (SearchText && SearchText != 'null') conditions.push(`(DISTRICT LIKE '%${SearchText}%' OR TALUKA LIKE '%${SearchText}%' OR VILLAGE LIKE '%${SearchText}%')`);
+      if (ShowInaugurated === 'true') conditions.push(`Inauguration_DATE IS NOT NULL`);
+      if (ShowCompleted === 'true') conditions.push(`COMPLETED_DATE IS NOT NULL`);
+
+      // Join the conditions with AND operator
+      const conditionsString = conditions.join(' AND ');
+  
+      // Queries
+      const strQry = `SELECT DISTRICT,TALUKA,IMPLIMANTATION_AUTHORITY,COUNT(*) as TOTAL,count(Inauguration_PHOTO1) as START_PHOTO,count(COMPLETED_PHOTO1) as COMPLETED_PHOTO FROM Water_Harvesting GROUP BY DISTRICT,TALUKA,IMPLIMANTATION_AUTHORITY ORDER BY DISTRICT,TALUKA,IMPLIMANTATION_AUTHORITY`;
+      console.log(947,strQry);
+  
+      // Execute both queries in parallel using Promise.all
+      const [getStatusTable] = await Promise.all([
+        queryData(strQry),
+       ]);
+  
+      // Send success response
+      res.send({
+        code: 200,
+        message: "Data Fetch Successful",
+        data: {
+          data: getStatusTable.recordset // Return the fetched records
+        }
+      });
+    } catch (error) {
+      // Send error response without referencing undefined variables
+      res.send({
+        code: 500,
+        message: error.message,
+        data: null  // No data in case of error
+      });
+    }
+  });
   app.post('/login', async (req, res) => {
     try {
       const { username, password } = req.body;
@@ -1211,6 +1267,6 @@ app.get('/getReportData', async (req, res) => {
       });
   }
 });
-app.listen(process.env.PORT || 1098,'0.0.0.0',()=>{
-  console.log(`App listening on port 1098`);
+app.listen(process.env.PORT || 1099,'0.0.0.0',()=>{
+  console.log(`App listening on port 1099`);
 })
