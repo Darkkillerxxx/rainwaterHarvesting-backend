@@ -911,7 +911,8 @@ app.get('/fetchRecords', async (req, res) => {
     }
   });
   app.get('/fetchStatus',async(req,res)=>{
-    const strQry = `SELECT DISTRICT,TALUKA,IMPLIMANTATION_AUTHORITY,COUNT(*) as TOTAL,count(Inauguration_PHOTO1) as START_PHOTO,count(COMPLETED_PHOTO1) as COMPLETED_PHOTO FROM Water_Harvesting GROUP BY DISTRICT,TALUKA,IMPLIMANTATION_AUTHORITY ORDER BY DISTRICT,TALUKA,IMPLIMANTATION_AUTHORITY`;
+    const { District } = req.query;
+    const strQry = `SELECT DISTRICT,TALUKA,IMPLIMANTATION_AUTHORITY,COUNT(*) as TOTAL,count(Inauguration_PHOTO1) as START_PHOTO,count(COMPLETED_PHOTO1) as COMPLETED_PHOTO FROM Water_Harvesting WHERE DISTRICT = '${District}' GROUP BY DISTRICT,TALUKA,IMPLIMANTATION_AUTHORITY ORDER BY DISTRICT,TALUKA,IMPLIMANTATION_AUTHORITY`;
     const response = await queryData(strQry);
      res.send({
          code:200,
