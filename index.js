@@ -1101,7 +1101,8 @@ app.get('/getTalukas', async (req, res) => {
 
 app.get('/getVillages', async (req, res) => {
   try {
-      const { District,Taluka } = req.query;
+      //const { District,Taluka } = req.query;
+      const { Taluka } = req.query;
 
       // if (!District || !Taluka) {
       //     return res.status(400).send({
@@ -1110,11 +1111,11 @@ app.get('/getVillages', async (req, res) => {
       //     });
       // }
 
-       const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM V_VILLAGE WHERE TALUKA = '${Taluka}' ORDER BY VILLAGE`; //DISTRICT='${District}' and 
-      //const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE TALUKA = '${Taluka}'`;
+       //const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM V_VILLAGE WHERE TALUKA = '${Taluka}' ORDER BY VILLAGE`; //DISTRICT='${District}' and 
+      const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE TALUKA = '${Taluka}'`;
 
       const villages = await queryData(getVillagesQuery);
-
+      console.log(getVillagesQuery);
       res.send({
           code: 200,
           message: "Success",
