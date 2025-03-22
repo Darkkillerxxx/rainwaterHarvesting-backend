@@ -856,16 +856,16 @@ app.get('/fetchRecords', async (req, res) => {
       const { authorization } = req.headers;
       const token = authorization && authorization?.split(' ')[1]
       let user;
-      if(token){
-        user = await verifyToken(token,process.env.JWTSECRET);
+      // if(token){
+      //   user = await verifyToken(token,process.env.JWTSECRET);
 
-        if(!user){
-          res.send({
-            code:400,
-            message:'Invalid User'
-          })
-        }
-      }
+      //   if(!user){
+      //     res.send({
+      //       code:400,
+      //       message:'Invalid User'
+      //     })
+      //   }
+      // }
       
       // Initialize the conditions array
       const conditions = [];
