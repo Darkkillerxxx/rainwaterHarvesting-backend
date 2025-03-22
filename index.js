@@ -408,8 +408,8 @@ app.post('/createRecords', jsonParser, async (req, res) => {
         fs.unlinkSync(imagePath);
         body.CRE_USR_DT =new Date(new Date().toLocaleString('en-US', {timeZone: 'Asia/Kolkata'})).toISOString();
         // new Date().toISOString();
-        body.CRE_USR_ID = user.userId;
-        body.CRE_BY_ADMIN = user.isAdmin ? 1 : 0;
+        body.CRE_USR_ID =11;// user.userId;
+        body.CRE_BY_ADMIN =0;// user.isAdmin ? 1 : 0;
 
         // Capitalize all data fields in the body .. updated by SUMIT
         // for (const key in body) {
