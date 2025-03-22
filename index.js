@@ -9,6 +9,7 @@ import Client from 'ftp';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { Console } from "console";
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -345,7 +346,7 @@ app.get('/getAllTargets',async(req,res)=>{
 
 const verifyToken = (token, secret) => {
   return new Promise((resolve, reject) => {
-    jwt.verify(token, secret, (err, decoded) => {
+    jwt.verify(token, secret, (erclearr, decoded) => {
       if (err) {
         return reject(err);
       }
@@ -361,11 +362,11 @@ app.post('/createRecords', jsonParser, async (req, res) => {
     try {
 
        // Extract the access token from the 'Authorization' header
-        const authToken = headers['authorization'];
-        const token = authToken && authToken.split(' ')[1]; // Assuming the format is 'Bearer <token>'
+        // const authToken = headers['authorization'];
+        // const token = authToken && authToken.split(' ')[1]; // Assuming the format is 'Bearer <token>'
         
         const user = await verifyToken(token,process.env.JWTSECRET);
-        console.log(346,user);
+        console.log(369,user);
         // Validate if Inauguration_PHOTO1 exists and is a valid base64 string
         if (!Inauguration_PHOTO1 || !Inauguration_PHOTO1.startsWith('data:image/')) {
             return res.status(400).send({
@@ -927,8 +928,8 @@ app.get('/fetchRecords', async (req, res) => {
       const { username, password } = req.body;
   
       // Initialize base query
-      let query = `SELECT * FROM tblUSER WHERE 1=1`;
-  
+      let query = `SELECT * FROM tblUSER WHERE USR_NM = '${username}'`;
+      
       // Add conditions to the query dynamically based on non-null values
       if (username) {
         query += ` AND USR_NM = '${username}'`;
