@@ -1103,12 +1103,12 @@ app.get('/getVillages', async (req, res) => {
   try {
       const { District,Taluka } = req.query;
 
-      if (!District || !Taluka) {
-          return res.status(400).send({
-              code: 400,
-              message: "Both District and Taluka are required"
-          });
-      }
+      // if (!District || !Taluka) {
+      //     return res.status(400).send({
+      //         code: 400,
+      //         message: "Both District and Taluka are required"
+      //     });
+      // }
 
        const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM V_VILLAGE WHERE TALUKA = '${Taluka}' ORDER BY VILLAGE`; //DISTRICT='${District}' and 
       //const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE TALUKA = '${Taluka}'`;
