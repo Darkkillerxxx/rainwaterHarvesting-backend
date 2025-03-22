@@ -1110,7 +1110,7 @@ app.get('/getVillages', async (req, res) => {
           });
       }
 
-       const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM V_VILLAGE WHERE DISTRICT='${District}' and TALUKA = '${Taluka}' ORDER BY VILLAGE`;
+       const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM V_VILLAGE WHERE TALUKA = '${Taluka}' ORDER BY VILLAGE`; //DISTRICT='${District}' and 
       //const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE TALUKA = '${Taluka}'`;
 
       const villages = await queryData(getVillagesQuery);
