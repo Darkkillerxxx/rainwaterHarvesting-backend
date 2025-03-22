@@ -108,7 +108,7 @@ function uploadImageToFTP(imagePath, imageName, folderName) {
 
 function generateMSSQLInsertQuery(tableName, insertObject) {
     // Get the keys and values from the object
-    console.log(62,insertObject);
+   // console.log(62,insertObject);
     const keys = Object.keys(insertObject);
     const values = Object.values(insertObject);
   
@@ -366,7 +366,7 @@ app.post('/createRecords', jsonParser, async (req, res) => {
         // const token = authToken && authToken.split(' ')[1]; // Assuming the format is 'Bearer <token>'
         
         const user = await verifyToken(token,process.env.JWTSECRET);
-        console.log(369,user);
+       // console.log(369,user);
         // Validate if Inauguration_PHOTO1 exists and is a valid base64 string
         if (!Inauguration_PHOTO1 || !Inauguration_PHOTO1.startsWith('data:image/')) {
             return res.status(400).send({
@@ -682,7 +682,7 @@ app.post('/updateRecords', jsonParser, async (req, res) => {
         // Save and upload completion photo
         if (completionPhotoBase64) {
             const matches = completionPhotoBase64.match(/^data:image\/([a-zA-Z]+);base64,/);
-            console.log(412,matches);
+           // console.log(412,matches);
             if (!matches || matches.length < 2) {
                 return res.status(400).send({
                     code: 400,
@@ -739,7 +739,7 @@ app.post('/updateRecords', jsonParser, async (req, res) => {
             }
         }
         // Generate the MSSQL update query
-        console.log(414,updateObject);
+        //console.log(414,updateObject);
         const updateQuery = generateMSSQLUpdateQuery('Water_Harvesting', updateObject, { ID });
         console.log(updateQuery);
 
@@ -885,7 +885,7 @@ app.get('/fetchRecords', async (req, res) => {
       const totalRecordsQuery = `SELECT COUNT(*) as totalRecords FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''}`;
       const fetchTalukaRecordsQuery = `SELECT * FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''} ORDER BY ID`;
       //console.log(fetchTalukaRecordsQuery)
-      console.log(546,totalRecordsQuery,fetchTalukaRecordsQuery);
+      //console.log(546,totalRecordsQuery,fetchTalukaRecordsQuery);
   
       // Execute both queries in parallel using Promise.all
       const [totalRecords, fetchTalukaRecords] = await Promise.all([
@@ -942,7 +942,7 @@ app.get('/fetchRecords', async (req, res) => {
   
       // Execute the query
       const response = await queryData(query);
-      console.log(response.recordset);
+      //console.log(response.recordset);
   
       if (response && response.recordset.length > 0) {
         const userId = response.recordset[0].ID;
