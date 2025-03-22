@@ -884,7 +884,7 @@ app.get('/fetchRecords', async (req, res) => {
       // Queries
       const totalRecordsQuery = `SELECT COUNT(*) as totalRecords FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''}`;
       const fetchTalukaRecordsQuery = `SELECT * FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''} ORDER BY ID`;
-  
+      console.log(fetchTalukaRecordsQuery)
       console.log(546,totalRecordsQuery,fetchTalukaRecordsQuery);
   
       // Execute both queries in parallel using Promise.all
@@ -1115,7 +1115,7 @@ app.get('/getVillages', async (req, res) => {
       const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE TALUKA = '${Taluka}'`;
 
       const villages = await queryData(getVillagesQuery);
-      console.log(getVillagesQuery);
+      console.log(villages);
       res.send({
           code: 200,
           message: "Success",
