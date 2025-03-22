@@ -884,7 +884,7 @@ app.get('/fetchRecords', async (req, res) => {
       // Queries
       const totalRecordsQuery = `SELECT COUNT(*) as totalRecords FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''}`;
       const fetchTalukaRecordsQuery = `SELECT * FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''} ORDER BY ID`;
-      console.log(fetchTalukaRecordsQuery)
+      //console.log(fetchTalukaRecordsQuery)
       console.log(546,totalRecordsQuery,fetchTalukaRecordsQuery);
   
       // Execute both queries in parallel using Promise.all
@@ -914,6 +914,7 @@ app.get('/fetchRecords', async (req, res) => {
   app.get('/fetchStatus',async(req,res)=>{
     const { District } = req.query;
     const strQry = `SELECT DISTRICT,TALUKA,IMPLIMANTATION_AUTHORITY,COUNT(*) as TOTAL,count(Inauguration_PHOTO1) as START_PHOTO,count(COMPLETED_PHOTO1) as COMPLETED_PHOTO FROM Water_Harvesting WHERE DISTRICT = '${District}' GROUP BY DISTRICT,TALUKA,IMPLIMANTATION_AUTHORITY ORDER BY DISTRICT,TALUKA,IMPLIMANTATION_AUTHORITY`;
+
     const response = await queryData(strQry);
      res.send({
          code:200,
@@ -1101,18 +1102,18 @@ app.get('/getTalukas', async (req, res) => {
 
 app.get('/getVillages', async (req, res) => {
   try {
-      //const { District,Taluka } = req.query;
-      const { Taluka } = req.query;
+      const { District,Taluka } = req.query;
+      //const { Taluka } = req.query;
 
-      // if (!District || !Taluka) {
-      //     return res.status(400).send({
-      //         code: 400,
-      //         message: "Both District and Taluka are required"
-      //     });
-      // }
+      if (!District || !Taluka) {
+          return res.status(400).send({
+              code: 400,
+              message: "Both District and Taluka are required"
+          });
+      }
 
-       //const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM V_VILLAGE WHERE TALUKA = '${Taluka}' ORDER BY VILLAGE`; //DISTRICT='${District}' and 
-      const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE TALUKA = '${Taluka}'`;
+      const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM V_VILLAGE WHERE DISTRICT='${District}' and TALUKA = '${Taluka}' ORDER BY VILLAGE`; 
+      //const getVillagesQuery = `SELECT DISTINCT VILLAGE FROM Water_Harvesting WHERE TALUKA = '${Taluka}'`;
 
       const villages = await queryData(getVillagesQuery);
       console.log(villages);
