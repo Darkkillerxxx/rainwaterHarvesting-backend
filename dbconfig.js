@@ -15,7 +15,7 @@ var connection = {
         trustServerCertificate:false
     }
 };
-
+//Rechange
 export const queryData = async(query) =>{
     try{
         await sql.connect(connection);
