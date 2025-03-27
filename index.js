@@ -863,7 +863,7 @@ app.post('/resetImage', async (req, res) => {
 })
 
 app.get('/getDistricts', async (req, res) => {
-    try {
+   try {
         const getAllDistrictsQuery = `SELECT DISTINCT DISTRICT,DIST_NO FROM V_VILLAGE order by DISTRICT`;
         //const getAllDistrictsQuery = `SELECT DISTINCT DISTRICT FROM Water_Harvesting`;
 
