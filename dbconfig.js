@@ -5,6 +5,7 @@ var connection = {
     user     : 'yojna',
     password : 'ICoVKSUPsAVgC9K',
     database : 'iVMS',
+    port : 3572,
     pool:{
         max:10,
         min:0,
