@@ -861,6 +861,47 @@ app.post('/resetImage', async (req, res) => {
         });
     }
 })
+app.delete('/DeleteRecord/:id', async (req, res) => {
+    try {
+        const recordId = req.params.id;
+        console.log(867, recordId);
+        // Validate input
+        if (!recordId) {
+            return res.status(400).json({
+                code: 400,
+                message: 'Record ID is required'
+            });
+        }
+
+        // Delete query with parameterized input
+        const query = `DELETE FROM Water_Harvesting WHERE Id = ?`;
+        
+        // Execute delete query
+        const result = await queryData(query, [recordId]);
+
+        // Check if any record was actually deleted
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                code: 404,
+                message: 'No record found with the given ID'
+            });
+        }
+
+        // Successful deletion
+        res.status(200).json({
+            code: 200,
+            message: 'Record deleted successfully'
+        });
+
+    } catch (error) {
+        console.error('Delete record error:', error);
+        res.status(500).json({
+            code: 500,
+            message: 'Internal server error',
+            error: error.message
+        });
+    }
+});
 
 app.get('/getDistricts', async (req, res) => {
    try {
@@ -1036,5 +1077,5 @@ app.get('/getReportData', async (req, res) => {
     }
 });
 app.listen(process.env.PORT || 1099, '0.0.0.0', () => {
-    console.log(`App listening on port 1099`);
+    console.log(`JalShakti BE App listening on port 1099`);
 })

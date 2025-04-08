@@ -3,7 +3,7 @@ import sql from 'mssql'
 var connection = {
     server     : '103.116.176.242',
     user     : 'yojna',
-    password : 'iis#2022',
+    password : 'ICoVKSUPsAVgC9K',
     database : 'iVMS',
     pool:{
         max:10,
