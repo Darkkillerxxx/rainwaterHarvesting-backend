@@ -737,7 +737,7 @@ app.get('/fetchStatus', async (req, res) => {
 })
 
 // npm install nodemailer
-import nodemailer from 'nodemailer';
+
 const sendOTPByEmail = async (email, otp) => {
     if (!email || email.trim() === "") {
         console.error("Error: Email is missing or empty.");
