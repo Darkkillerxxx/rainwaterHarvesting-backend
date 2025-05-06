@@ -662,7 +662,7 @@ app.post('/newupdateRecords', jsonParser, async (req, res) => {
 
 app.get('/fetchRecords', async (req, res) => {
     try {
-        const { District, Village, Taluka, SearchText, ShowInaugurated, ShowCompleted } = req.query;
+        const { District, Village,CRE_USR_ID, Taluka, SearchText, ShowInaugurated, ShowCompleted } = req.query;
         const { authorization } = req.body;
         const token = authorization && authorization?.split(' ')[1]
         let user;
@@ -685,6 +685,7 @@ app.get('/fetchRecords', async (req, res) => {
         if (District && District != 'null') conditions.push(`DISTRICT = '${District}'`);
         if (Taluka && Taluka != 'null') conditions.push(`TALUKA = '${Taluka}'`);
         if (Village && Village != 'null') conditions.push(`VILLAGE = '${Village}'`);
+        if (CRE_USR_ID && CRE_USR_ID != 'null') conditions.push(`CRE_USR_ID = '${CRE_USR_ID}'`);
         if (SearchText && SearchText != 'null') conditions.push(`(DISTRICT LIKE '%${SearchText}%' OR TALUKA LIKE '%${SearchText}%' OR VILLAGE LIKE '%${SearchText}%')`);
         if (ShowInaugurated === 'true') conditions.push(`Inauguration_DATE IS NOT NULL`);
         if (ShowCompleted === 'true') conditions.push(`COMPLETED_DATE IS NOT NULL`);
@@ -695,7 +696,7 @@ app.get('/fetchRecords', async (req, res) => {
         // Queries
         const totalRecordsQuery = `SELECT COUNT(*) as totalRecords FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''}`;
         const fetchTalukaRecordsQuery = `SELECT * FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''} ORDER BY ID`;
-        // console.log(890,fetchTalukaRecordsQuery);
+         console.log(698,fetchTalukaRecordsQuery);
         // console.log(891,totalRecordsQuery);
 
         // Execute both queries in parallel using Promise.all
