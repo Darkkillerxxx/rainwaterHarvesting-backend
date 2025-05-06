@@ -883,8 +883,8 @@ app.post('/login', async (req, res) => {
 
 app.post('/verifyOtp', async (req, res) => {
     try {
-        const { email } = req.query;
-        const { otp } = req.body;
+       // const { email } = req.query;
+        const { email,otp } = req.body;
 
         if (!email) {
             return res.status(400).send({
@@ -895,7 +895,7 @@ app.post('/verifyOtp', async (req, res) => {
         if (!otp) {
             return res.status(400).send({
                 code: 400,
-                message: "Email is required"
+                message: "OTP is required"
             });
         }
 
