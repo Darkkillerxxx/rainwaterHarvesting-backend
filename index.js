@@ -1,3 +1,4 @@
+import nodemailer from 'nodemailer';
 import "dotenv/config"
 import express, { response } from 'express';
 import bodyParser from 'body-parser';
@@ -662,7 +663,7 @@ app.post('/newupdateRecords', jsonParser, async (req, res) => {
 
 app.get('/fetchRecords', async (req, res) => {
     try {
-        const { District, Village,CRE_USR_ID, Taluka, SearchText, ShowInaugurated, ShowCompleted } = req.query;
+        const { District, Village, CRE_USR_ID, Taluka, SearchText, ShowInaugurated, ShowCompleted } = req.query;
         const { authorization } = req.body;
         const token = authorization && authorization?.split(' ')[1]
         let user;
@@ -696,7 +697,7 @@ app.get('/fetchRecords', async (req, res) => {
         // Queries
         const totalRecordsQuery = `SELECT COUNT(*) as totalRecords FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''}`;
         const fetchTalukaRecordsQuery = `SELECT * FROM Water_Harvesting ${conditionsString ? `WHERE ${conditionsString}` : ''} ORDER BY ID`;
-         console.log(698,fetchTalukaRecordsQuery);
+        console.log(698, fetchTalukaRecordsQuery);
         // console.log(891,totalRecordsQuery);
 
         // Execute both queries in parallel using Promise.all
@@ -735,55 +736,257 @@ app.get('/fetchStatus', async (req, res) => {
     })
 })
 
+// npm install nodemailer
+import nodemailer from 'nodemailer';
+const sendOTPByEmail = async (email, otp) => {
+    if (!email || email.trim() === "") {
+        console.error("Error: Email is missing or empty.");
+        return false;
+    }
 
+    let transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: "roshani26b@gmail.com",
+            pass: "qrbq xqdb cgub gvit"
+        }
+    });
+
+    // Current date for the email footer
+    const currentDate = new Date().toLocaleDateString();
+
+    let mailOptions = {
+        from: '"Jalshakti" <roshani26b@gmail.com>',
+        to: email,
+        subject: "Your OTP Verification Code for Jalshakti System",
+        html: `
+            <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; padding: 20px; background: #f0f8ff; border-radius: 10px; border: 1px solid #d0e7ff;">
+                <div style="text-align: center;">
+                    <div style="font-size: 40px; margin-bottom: 10px;">🦚</div>
+                    <h1 style="color: #0077cc; margin: 0;">Jalshakti</h1>
+                    <p style="color: #555; font-size: 14px; margin-top: 5px;">Water Resource Management System</p>
+                </div>
+
+                <div style="margin-top: 30px; background-color: #ffffff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+                    <h2 style="color: #004e92;">🔐 OTP Verification</h2>
+                    <p style="color: #333;">Hello,</p>
+                    <p style="color: #333;">Please use the following One-Time Password (OTP) to complete your verification:</p>
+
+                    <div style="background-color: #e6f0ff; border: 2px dashed #0077cc; padding: 15px; font-size: 32px; font-weight: bold; color: #0077cc; text-align: center; margin: 20px 0; letter-spacing: 6px; border-radius: 6px;">
+                        ${otp}
+                    </div>
+
+                    <p style="color: #444; font-size: 14px;">This code is valid for <strong>10 minutes</strong> and can be used only once.</p>
+                    <p style="color: #888; font-size: 13px; font-style: italic;">If you didn't request this OTP, please ignore this email.</p>
+                </div>
+
+                <div style="text-align: center; color: #999; font-size: 12px; margin-top: 30px; border-top: 1px solid #ccc; padding-top: 15px;">
+                    <p>&copy; ${currentDate} Jalshakti System. All rights reserved.</p>
+                    <p>This is an automated message. Please do not reply.</p>
+                </div>
+            </div>
+            `
+
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log("OTP email sent successfully to:", email);
+        return true;
+    } catch (error) {
+        console.error("Nodemailer Error:", error);
+        return false;
+    }
+};
+
+// Login route with improved error handling
 app.post('/login', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { username, password, email } = req.body;
 
-        // Initialize base query
-        let query = `SELECT * FROM tblUSER WHERE USR_NM = '${username}'`;
+        if (email) {
+            // Generate a 6-digit OTP
+            const otp = Math.floor(100000 + Math.random() * 900000);
+            const otpGeneratedDate = new Date().toISOString();
 
-        // Add conditions to the query dynamically based on non-null values
-        if (username) {
-            query += ` AND USR_NM = '${username}'`;
-        }
-        if (password) {
-            query += ` AND USR_PWD = '${password}'`;
-        }
+            // Check if email exists in database
+            const checkEmailQuery = `SELECT COUNT(*) AS count FROM tblUSER WHERE EMAIL_ID = '${email}'`;
+            const emailCheck = await queryData(checkEmailQuery);
 
+            if (!emailCheck || emailCheck.recordset[0].count === 0) {
+                return res.status(404).send({
+                    code: 404,
+                    message: "Email not registered in our system"
+                });
+            }
 
-        // Execute the query
-        const response = await queryData(query);
-        //   console.log(response.recordset);
+            // Update the OTP and its generation timestamp in the database
+            const query = `UPDATE tblUSER SET OTP = ${otp} WHERE EMAIL_ID = '${email}'`;
+            await queryData(query);
 
-        if (response && response.recordset.length > 0) {
-            const userId = response.recordset[0].ID;
-            const userType = response.recordset[0].USR_TYPE;
-            const isAdmin = response.recordset[0].isADMIN;
-            const accessToken = jwt.sign({ userId, isAdmin, userType }, jwtSecret, {
-                expiresIn: "100000d",
+            // Send OTP via email
+            const emailSent = await sendOTPByEmail(email, otp);
+
+            if (emailSent) {
+                return res.status(200).send({
+                    code: 200,
+                    message: "OTP successfully sent to your email",
+                    email: email // Return email for verification reference
+                });
+            } else {
+                return res.status(500).send({
+                    code: 500,
+                    message: "Failed to send OTP email. Please try again."
+                });
+            }
+        } else if (username && password) {
+            // Regular login with username and password
+            const query = `SELECT * FROM tblUSER WHERE USR_NM = '${username}' AND USR_PWD = '${password}'`;
+            const response = await queryData(query);
+            console.log("login :", query);
+            console.log(response)
+
+            if (response && response.recordset.length > 0) {
+                const userId = response.recordset[0].ID;
+                const userType = response.recordset[0].USR_TYPE;
+                const isAdmin = response.recordset[0].isADMIN;
+                const accessToken = jwt.sign({ userId, isAdmin, userType }, jwtSecret, {
+                    expiresIn: "100000d",
+                });
+
+                return res.status(200).send({
+                    code: 200,
+                    message: "Login successful",
+                    token: accessToken,
+                    userData: response.recordset[0]
+                });
+            }
+
+            return res.status(404).send({
+                code: 404,
+                message: "Invalid username or password",
             });
-
-            res.send({
-                code: 200,
-                message: "User Found",
-                token: accessToken,
-                userData: response.recordset[0]
+        } else {
+            return res.status(400).send({
+                code: 400,
+                message: "Please provide either email for OTP login or username/password for regular login",
             });
-            return;
         }
-
-        res.send({
-            code: 404,
-            message: "User Not Found",
-        });
     } catch (error) {
-        res.send({
+        console.error("Login error:", error);
+        return res.status(500).send({
             code: 500,
-            message: error.message,
+            message: error.message || "An error occurred during login",
         });
     }
 });
+
+app.post('/verifyOtp', async (req, res) => {
+    try {
+        const { email } = req.query;
+        const { otp } = req.body;
+
+        if (!email) {
+            return res.status(400).send({
+                code: 400,
+                message: "Email is required"
+            });
+        }
+        if (!otp) {
+            return res.status(400).send({
+                code: 400,
+                message: "Email is required"
+            });
+        }
+
+        // Query to find user with matching email and OTP
+        const query = `SELECT * FROM tblUSER WHERE EMAIL_ID = '${email}' AND OTP = '${otp}'`;
+        const response = await queryData(query);
+
+        if (!response || response.recordset.length === 0) {
+            return res.status(400).send({
+                code: 400,
+                message: "Invalid OTP"
+            });
+        }
+
+        const user = response.recordset[0];
+
+        // Check if OTP has expired (10 minutes validity)
+        // const otpTimestamp = new Date(user.OTP_TIMESTAMP);
+        // const currentTime = new Date();
+        // const timeDifferenceMinutes = (currentTime - otpTimestamp) / (1000 * 60);
+
+        // if (timeDifferenceMinutes > 10) {
+        //     return res.status(400).send({
+        //         code: 400,
+        //         message: "OTP has expired. Please request a new one."
+        //     });
+        // }
+
+        // Clear the OTP after successful verification
+        // const clearOtpQuery = `UPDATE tblUSER SET OTP = NULL WHERE EMAIL_ID = '${email}'`;
+        // await queryData(clearOtpQuery);
+
+        // Generate JWT token for authentication
+        const userId = user.ID;
+        const userType = user.USR_TYPE;
+        const isAdmin = user.isADMIN;
+        const accessToken = jwt.sign({ userId, isAdmin, userType }, jwtSecret, {
+            expiresIn: "100000d",
+        });
+
+        return res.status(200).send({
+            code: 200,
+            message: "OTP verification successful",
+            token: accessToken,
+            userData: user
+        });
+
+    } catch (error) {
+        console.error("OTP verification error:", error);
+        return res.status(500).send({
+            code: 500,
+            message: error.message || "An error occurred during OTP verification"
+        });
+    }
+});
+
+app.patch('/updatePassword', async (req, res) => {
+    try {
+        const { email } = req.query;
+        const { password } = req.body;
+
+        if (!email) {
+            return res.status(400).send({
+                code: 400,
+                message: "Email is required"
+            });
+        }
+
+        // Query to find user with matching email and OTP
+        const query = `update tblUSER SET USR_PWD ='${password}' WHERE EMAIL_ID = '${email}'`;
+        const response = await queryData(query);
+
+        return res.status(200).send({
+            code: 200,
+            message: "Password updated!"
+        });
+
+    } catch (error) {
+        return res.status(500).send({
+            code: 500,
+            message: error.message
+        });
+    }
+});
+
+app.get('/getSliderImages', async (req, res) => {
+    res.send({
+        code: 200,
+        data: await getSliderImages()
+    });
+})
 
 
 app.get('/getSliderImages', async (req, res) => {
@@ -876,7 +1079,7 @@ app.delete('/DeleteRecord/:id', async (req, res) => {
 
         // Delete query with parameterized input
         const query = `DELETE FROM Water_Harvesting WHERE Id = ?`;
-        
+
         // Execute delete query
         const result = await queryData(query, [recordId]);
 
@@ -905,7 +1108,7 @@ app.delete('/DeleteRecord/:id', async (req, res) => {
 });
 
 app.get('/getDistricts', async (req, res) => {
-   try {
+    try {
         const getAllDistrictsQuery = `SELECT DISTINCT DISTRICT,DIST_NO FROM V_VILLAGE order by DISTRICT`;
         //const getAllDistrictsQuery = `SELECT DISTINCT DISTRICT FROM Water_Harvesting`;
 
