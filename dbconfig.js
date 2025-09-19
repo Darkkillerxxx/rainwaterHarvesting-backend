@@ -1,7 +1,7 @@
 import sql from 'mssql'
 
 var connection = {
-    server     : '103.116.176.242',
+    server     : '123.253.12.12',
     user     : 'yojna',
     password : 'ICoVKSUPsAVgC9K',
     database : 'iVMS',
