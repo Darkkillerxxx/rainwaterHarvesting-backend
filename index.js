@@ -735,7 +735,6 @@ app.get('/fetchStatus', async (req, res) => {
         data: response.recordsets[0]
     })
 })
-
 // npm install nodemailer
 
 const sendOTPByEmail = async (email, otp) => {
@@ -883,8 +882,8 @@ app.post('/login', async (req, res) => {
 
 app.post('/verifyOtp', async (req, res) => {
     try {
-       // const { email } = req.query;
-        const { email,otp } = req.body;
+        // const { email } = req.query;
+        const { email, otp } = req.body;
 
         if (!email) {
             return res.status(400).send({
@@ -1282,4 +1281,20 @@ app.get('/getReportData', async (req, res) => {
 });
 app.listen(process.env.PORT || 1099, '0.0.0.0', () => {
     console.log(`JalShakti BE App listening on port 1099`);
+})
+
+//Vocal4Local
+app.get('/getDistACBoothWard', async (req, res) => {
+    const { District } = req.query;
+    const strQry = `select a.DIST_NO,a.AC_NO,a.AC_NAME,a.ENG_AC_NAME,b.BOOTH_NO ,b.BOOTH_NAME ,b.ENG_BOOTH_NAME ,b.PSBUILDING_DETAIL,b.CPID,b.WARD_NO,c.WARD_NAME_GUJ,c.WARD_NAME  --,b.* 
+from [dbo].[AC_LIST] as a, BOOTHLIST as b,mstWard as c
+where a.ac_no=b.ac_no and b.dist_no=22 and b.cpid=c.cpid and b.WARD_NO =c.ward_no
+order by a.DIST_NO,a.AC_NO,b.booth_no`;
+
+    const response = await queryData(strQry);
+    res.send({
+        code: 200,
+        message: "Success",
+        data: response.recordsets[0]
+    })
 })
