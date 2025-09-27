@@ -1285,17 +1285,51 @@ app.listen(process.env.PORT || 1099, '0.0.0.0', () => {
 
 //Vocal4Local
 app.get('/getDistACBoothWard', async (req, res) => {
-    const { District } = req.query;
-    const strQry = `select a.DIST_NO,d.DIST_NAME ,d.ENG_DIST_NAME  ,a.AC_NO,a.AC_NAME,a.ENG_AC_NAME,b.BOOTH_NO ,b.BOOTH_NAME ,b.ENG_BOOTH_NAME ,b.PSBUILDING_DETAIL,b.CPID,b.WARD_NO,c.WARD_NAME_GUJ,c.WARD_NAME  --,b.* 
-from [dbo].[AC_LIST] as a, BOOTHLIST as b,mstWard as c,DIST_LIST as d
-where a.dist_no=b.dist_no and  a.ac_no=b.ac_no and b.dist_no=22 and b.cpid=c.cpid and b.WARD_NO =c.ward_no
-order by a.DIST_NO,a.AC_NO,b.booth_no`;
-// and c.ward_no=25
+    try {
+        // const { DIST_NO } = req.query;
 
-    const response = await queryData(strQry);
-    res.send({
-        code: 200,
-        message: "Success",
-        data: response.recordsets[0]
-    })
+        // if (!DIST_NO) {
+        //     const strQry = `select a.DIST_NO,d.DIST_NAME ,d.ENG_DIST_NAME  ,a.AC_NO,a.AC_NAME,a.ENG_AC_NAME,b.BOOTH_NO ,b.BOOTH_NAME ,b.ENG_BOOTH_NAME ,b.PSBUILDING_DETAIL,b.CPID,b.WARD_NO,c.WARD_NAME_GUJ,c.WARD_NAME 
+        //                     from [dbo].[AC_LIST] as a, BOOTHLIST as b,mstWard as c,DIST_LIST as d
+        //                     where a.dist_no=b.dist_no and a.dist_no=d.dist_no  and b.dist_no=b.dist_no and a.ac_no=b.ac_no and b.cpid=c.cpid and b.WARD_NO =c.ward_no
+        //                     and d.dist_no = ${DIST_NO}
+        //                     order by a.DIST_NO,a.AC_NO,b.booth_no`;
+        //     console.log(strQry);
+        //     const response = await queryData(strQry);
+        //     res.send({
+        //         code: 200,
+        //         message: "Success",
+        //         data: response.recordsets[0]
+        //     })
+        // }
+        // {
+        //     const strQry = `select a.DIST_NO,d.DIST_NAME ,d.ENG_DIST_NAME  ,a.AC_NO,a.AC_NAME,a.ENG_AC_NAME,b.BOOTH_NO ,b.BOOTH_NAME ,b.ENG_BOOTH_NAME ,b.PSBUILDING_DETAIL,b.CPID,b.WARD_NO,c.WARD_NAME_GUJ,c.WARD_NAME  
+        //                     from [dbo].[AC_LIST] as a, BOOTHLIST as b,mstWard as c,DIST_LIST as d
+        //                     where a.dist_no=b.dist_no and a.dist_no=d.dist_no  and b.dist_no=b.dist_no and a.ac_no=b.ac_no and b.cpid=c.cpid and b.WARD_NO =c.ward_no                            
+        //                     order by a.DIST_NO,a.AC_NO,b.booth_no`;
+        //     console.log(strQry);
+        //     const response = await queryData(strQry);
+        //     res.send({
+        //         code: 200,
+        //         message: "Success",
+        //         data: response.recordsets[0]
+        //     })
+        // }
+        const strQry = `select a.DIST_NO,d.DIST_NAME ,d.ENG_DIST_NAME  ,a.AC_NO,a.AC_NAME,a.ENG_AC_NAME,b.BOOTH_NO ,b.BOOTH_NAME ,b.ENG_BOOTH_NAME ,b.PSBUILDING_DETAIL,b.CPID,b.WARD_NO,c.WARD_NAME_GUJ,c.WARD_NAME  
+                            from [dbo].[AC_LIST] as a, BOOTHLIST as b,mstWard as c,DIST_LIST as d
+                            where a.dist_no=b.dist_no and a.dist_no=d.dist_no  and b.dist_no=b.dist_no and a.ac_no=b.ac_no and b.cpid=c.cpid and b.WARD_NO =c.ward_no                            
+                            order by a.DIST_NO,a.AC_NO,b.booth_no`;
+        // console.log(strQry);
+        const response = await queryData(strQry);
+        res.send({
+            code: 200,
+            message: "Success",
+            data: response.recordsets[0]
+        })
+    } catch (error) {
+        res.status(500).send({
+            code: 500,
+            message: error.message
+        });
+    }
 })
